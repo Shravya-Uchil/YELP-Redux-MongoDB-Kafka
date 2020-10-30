@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GET_CUSTOMER, UPDATE_CUSTOMER } from "../actionTypes";
+import { GET_CUSTOMER, UPDATE_CUSTOMER, CUSTOMER_CARD } from "../actionTypes";
 import serverAddress from "../config";
 
 export const getCustomerDetails = () => (dispatch) => {
@@ -36,6 +36,22 @@ export const updateCustomerDetails = (customerDetails) => (dispatch) => {
         payload: data,
       });
     })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+export const getCustomerCard = (customerId) => (dispatch) => {
+  console.log("get action");
+  axios
+    .get(`${serverAddress}/yelp/profile/customerById/${customerId}`)
+    .then((response) => response.data[0])
+    .then((customer) =>
+      dispatch({
+        type: CUSTOMER_CARD,
+        payload: customer,
+      })
+    )
     .catch((error) => {
       console.log(error);
     });

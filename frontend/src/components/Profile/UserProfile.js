@@ -30,35 +30,6 @@ class CustomerProfile extends Component {
 
   componentWillMount() {
     console.log("We are here, emailid is " + localStorage.getItem("email_id"));
-    /*axios
-      .get(
-        `${serverAddress}/yelp/profile/customer/${localStorage.getItem(
-          "email_id"
-        )}`
-      )
-      .then((response) => {
-        console.log("Response:", response.data[0]);
-        var userData = {
-          //user_id: user.user_id || this.state.user_id,
-          cust_name: response.data[0].cust_name,
-          email_id: response.data[0].email_id,
-          address: response.data[0].address,
-          //phone_number: response.data[0].phone_number,
-          cust_image: response.data[0].cust_image,
-          password: response.data[0].password,
-          //dob: response.data[0].dob,
-          nick_name: response.data[0].nick_name,
-          headline: response.data[0].headline,
-          //yelp_since: response.data[0].yelp_since,
-          //things_love: response.data[0].things_love,
-        };
-        this.setState(userData);
-        console.log("State:", this.state);
-      })
-      .catch((error) => {
-        console.log("error:");
-        console.log(error);
-      });*/
     this.props.getCustomerDetails();
   }
 
@@ -133,18 +104,6 @@ class CustomerProfile extends Component {
   onUpdate = (e) => {
     //prevent page from refresh
     e.preventDefault();
-    /*axios.defaults.withCredentials = true;
-    let data = Object.assign({}, this.state);
-    axios
-      .post(`${serverAddress}/yelp/profile/customer`, data)
-      .then((response) => {
-        console.log("Updated");
-        alert("Updated profile");
-      })
-      .catch((error) => {
-        console.log("Error");
-        console.log(error);
-      });*/
     let data = Object.assign({}, this.state);
     this.props.updateCustomerDetails(data);
     document.getElementById("update").blur();

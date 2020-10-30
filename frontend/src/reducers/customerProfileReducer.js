@@ -1,4 +1,4 @@
-import { GET_CUSTOMER, UPDATE_CUSTOMER } from "../actionTypes";
+import { GET_CUSTOMER, UPDATE_CUSTOMER, CUSTOMER_CARD } from "../actionTypes";
 
 const initialState = {
   customer: {},
@@ -12,6 +12,11 @@ export default function (state = initialState, action) {
         customer: action.payload,
       };
     case GET_CUSTOMER:
+      return {
+        ...state,
+        customer: action.payload,
+      };
+    case CUSTOMER_CARD:
       return {
         ...state,
         customer: action.payload,

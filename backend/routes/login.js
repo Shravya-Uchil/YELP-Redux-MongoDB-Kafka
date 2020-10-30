@@ -2,10 +2,34 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const db = require("../mysqlDB.js");
+const kafka = require("../kafka/client");
 
 router.post("/customer", (req, res) => {
   console.log("Customer login");
-  let sql_query = `CALL get_user('${req.body.email_id}');`;
+  kafka.make_request(
+    "login-topic",
+    { path: "customer_login", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        return res.status(err.status).send(err.message);
+      } else {
+        console.log(results);
+        if (results.status === 200) {
+          req.session.user = results.data.email_id;
+          res.cookie("cookie", "admin", {
+            maxAge: 900000,
+            httpOnly: false,
+            path: "/",
+          });
+          return res.status(results.status).send(results.data);
+        } else {
+          return res.status(results.status).send(results.errors);
+        }
+      }
+    }
+  );
+  /*let sql_query = `CALL get_user('${req.body.email_id}');`;
 
   db.query(sql_query, async (err, result) => {
     if (err) {
@@ -61,12 +85,35 @@ router.post("/customer", (req, res) => {
       });
       res.end("NO_CUSTOMER");
     }
-  });
+  });*/
 });
 
 router.post("/restaurant", (req, res) => {
   console.log("Restaurant login");
-  let sql_query = `CALL get_restaurant('${req.body.email_id}');`;
+  kafka.make_request(
+    "login-topic",
+    { path: "restaurant_login", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        return res.status(err.status).send(err.message);
+      } else {
+        console.log(results);
+        if (results.status === 200) {
+          req.session.user = results.data.email_id;
+          res.cookie("cookie", "admin", {
+            maxAge: 900000,
+            httpOnly: false,
+            path: "/",
+          });
+          return res.status(results.status).send(results.data);
+        } else {
+          return res.status(results.status).send(results.errors);
+        }
+      }
+    }
+  );
+  /*let sql_query = `CALL get_restaurant('${req.body.email_id}');`;
   db.query(sql_query, async (err, result) => {
     console.log("result:" + result);
     if (err) {
@@ -122,7 +169,7 @@ router.post("/restaurant", (req, res) => {
       });
       res.end("NO_CUSTOMER");
     }
-  });
+  });*/
 });
 
 module.exports = router;

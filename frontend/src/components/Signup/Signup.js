@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-// import axios from "axios";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { customerSignup } from "../../actions/signupActions";
@@ -40,22 +39,6 @@ class Create extends Component {
     this.setState({
       signupDone: 1,
     });
-    /*axios.defaults.withCredentials = true;
-    //make a post request with the user data
-    axios
-      .post("${serverAddress}/yelp/signup/customer", data)
-      .then((response) => {
-        console.log("Status Code : ", response.status);
-        if (response.status === 200) {
-          this.props.history.replace("/login");
-        } else {
-          alert("status not 200!!!");
-        }
-      })
-      .catch((e) => {
-        console.log(e);
-        alert("Failed to signup!!!");
-      });*/
   };
   render() {
     let redirectVar = null;
