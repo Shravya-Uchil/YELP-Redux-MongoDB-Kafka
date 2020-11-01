@@ -24,6 +24,7 @@ const menuItemSchema = new schema(
     item_image: {
       type: String,
       trim: true,
+      default: "default",
     },
     item_ingredients: {
       type: String,

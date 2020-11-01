@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt");
-const pool = require("../mysqlDB.js");
+//const bcrypt = require("bcrypt");
+//const pool = require("../mysqlDB.js");
 const kafka = require("../kafka/client");
 
 router.post("/customer", async (req, res) => {

@@ -18,6 +18,12 @@ import { Link } from "react-router-dom";
 import Map from "../Map/Map";
 import Geocode from "react-geocode";
 import serverAddress from "../../config";
+import {
+  getCustomerDetailsHome,
+  searchRestaurantsHome,
+} from "../../actions/customerHomeActions";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
 
 Geocode.setApiKey("AIzaSyAIzrgRfxiIcZhQe3Qf5rIIRx6exhZPwwE");
 Geocode.setLanguage("en");
@@ -26,11 +32,15 @@ Geocode.setRegion("us");
 class CustomerHome extends Component {
   constructor(props) {
     super(props);
+    // redux change
+    this.state = {};
+    //redux change comment
+    /*
     this.setState({
       search_input: "",
       noRecords: 0,
       locations: [],
-    });
+    });*/
 
     this.onChange = this.onChange.bind(this);
     this.onSearch = this.onSearch.bind(this);
@@ -38,8 +48,70 @@ class CustomerHome extends Component {
     this.getCustomerInfo();
   }
 
+  // redux addition
+
+  componentWillReceiveProps(nextProps) {
+    console.log(
+      "We in Customer Home props received, next prop is: ",
+      nextProps
+    );
+    if (nextProps.customer) {
+      console.log("Customer response");
+      console.log(nextProps);
+      this.setState({
+        customer: nextProps,
+      });
+      let addr = "San Jose";
+      if (nextProps.city != "") {
+        addr = nextProps.city;
+      }
+      Geocode.fromAddress(addr).then(
+        (resp) => {
+          console.log("Locations");
+          console.log(resp.results[0].geometry);
+          //console.log(latitude + ", " + longitude);
+          let coordinates = {
+            lat: resp.results[0].geometry.location.lat,
+            lng: resp.results[0].geometry.location.lng,
+            address: "YOU",
+          };
+          console.log("Coordinates");
+          console.log(coordinates);
+
+          this.setState({
+            center: coordinates,
+          });
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+    } else if (nextProps.restaurant) {
+      var cuisines = [];
+      console.log("Restaurant response");
+      console.log(nextProps);
+      if (nextProps.restaurant === "NO_RECORD") {
+        this.setState({
+          noRecords: true,
+          filteredRestaurants: null,
+        });
+      } else {
+        this.setState({
+          allRestaurants: nextProps,
+          filteredRestaurants: nextProps,
+          noRecords: false,
+          search_input: "",
+        });
+      }
+    } else {
+      console.log("Redux error. Props:");
+      console.log(nextProps);
+    }
+  }
+
   getCustomerInfo = () => {
-    axios
+    getCustomerDetailsHome();
+    /*axios
       .get(
         `${serverAddress}/yelp/profile/customerById/${localStorage.getItem(
           "customer_id"
@@ -50,9 +122,13 @@ class CustomerHome extends Component {
         console.log(response.data);
         if (response.data) {
           this.setState({
-            customer: response.data[0],
+            customer: response.data,
           });
-          Geocode.fromAddress(response.data[0].city).then(
+          let addr = "San Jose";
+          if (response.data.city != "") {
+            addr = response.data.city;
+          }
+          Geocode.fromAddress(addr).then(
             (resp) => {
               console.log("Locations");
               console.log(resp.results[0].geometry);
@@ -78,18 +154,19 @@ class CustomerHome extends Component {
       .catch((error) => {
         console.log("Error");
         console.log(error);
-      });
+      });*/
   };
 
   componentDidMount() {
-    axios
+    searchRestaurantsHome("_");
+    /*axios
       .get(`${serverAddress}/yelp/restaurant/search/_`)
       .then((response) => {
         var cuisines = [];
         console.log("response");
         console.log(response.data);
         if (response.data) {
-          if (response.data[0].result === "NO_RECORD") {
+          if (response.data === "NO_RECORD") {
             this.setState({
               noRecords: true,
               search: "",
@@ -107,7 +184,7 @@ class CustomerHome extends Component {
       .catch((error) => {
         console.log("Error");
         console.log(error);
-      });
+      });*/
   }
 
   onChange = (e) => {
@@ -175,20 +252,28 @@ class CustomerHome extends Component {
         this.state.search_input === ""
           ? "_"
           : this.state.search_input;
-      axios
+      this.setState({
+        search_input: searchInput,
+      });
+      searchRestaurantsHome(searchInput);
+      /*axios
         .get(`${serverAddress}/yelp/restaurant/search/${searchInput}`)
         .then((response) => {
+          console.log("resp");
+          console.log(response);
           if (response.data) {
-            if (response.data[0].result === "NO_RECORD") {
+            if (response.data === "NO_RECORD") {
+              console.log("Here");
               this.setState({
-                noRecord: true,
+                noRecords: true,
                 search_input: searchInput,
-                filteredRestaurants: this.state.allRestaurants,
+                filteredRestaurants: null,
               });
             } else {
+              console.log("there");
               this.setState({
                 filteredRestaurants: response.data,
-                noRecord: false,
+                noRecords: false,
                 search_input: "",
               });
             }
@@ -198,7 +283,7 @@ class CustomerHome extends Component {
           if (error.response && error.response.data) {
             console.log(error.response.data);
           }
-        });
+        });*/
     }
   };
 
@@ -354,4 +439,21 @@ class CustomerHome extends Component {
   }
 }
 //export Home Component
-export default CustomerHome;
+//export default CustomerHome;
+
+CustomerHome.propTypes = {
+  getCustomerDetailsHome: PropTypes.func.isRequired,
+  searchRestaurantsHome: PropTypes.func.isRequired,
+  customer: PropTypes.object.isRequired,
+  restaurant: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  customer: state.customerHome.customer,
+  restaurant: state.customerHome.restaurant,
+});
+
+export default connect(mapStateToProps, {
+  getCustomerDetailsHome,
+  searchRestaurantsHome,
+})(CustomerHome);

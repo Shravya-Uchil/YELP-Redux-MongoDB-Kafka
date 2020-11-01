@@ -57,7 +57,7 @@ let handle_request = async (msg, callback) => {
           password: encryptedPassword,
           zip_code: msg.body.zip_code,
           lat: msg.body.lat,
-          lan: msg.body.lan,
+          lng: msg.body.lng,
         });
         const restaurantsave = await restaurant.save();
         if (restaurantsave) {
@@ -77,7 +77,7 @@ let handle_request = async (msg, callback) => {
       return callback(err, null);
     }
   } else {
-    callback(null, { status: 500, response: "no path found" });
+    callback(null, { status: 500, data: "no path found" });
   }
 };
 

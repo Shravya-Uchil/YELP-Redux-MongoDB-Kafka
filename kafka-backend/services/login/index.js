@@ -30,6 +30,7 @@ let handle_request = async (msg, callback) => {
             cust_name: customer.cust_name,
             email_id: customer.email_id,
             password: customer.password,
+            login_type: 0,
           };
           response.data = JSON.stringify(customerObject);
           return callback(null, response);
@@ -60,6 +61,7 @@ let handle_request = async (msg, callback) => {
             cust_name: restaurant.cust_name,
             email_id: restaurant.email_id,
             password: restaurant.password,
+            login_type: 1,
           };
           response.data = JSON.stringify(restaurantObject);
           return callback(null, response);
@@ -71,7 +73,7 @@ let handle_request = async (msg, callback) => {
       }
     } else {
       console.log("no path");
-      callback(null, { status: 500, response: "no path found" });
+      callback(null, { status: 500, data: "no path found" });
     }
   } catch (error) {
     console.log(error);

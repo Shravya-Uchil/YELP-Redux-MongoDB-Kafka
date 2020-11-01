@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt");
-const db = require("../mysqlDB.js");
+//const bcrypt = require("bcrypt");
+//const db = require("../mysqlDB.js");
 const kafka = require("../kafka/client");
 
 router.post("/customer", (req, res) => {
@@ -12,7 +12,10 @@ router.post("/customer", (req, res) => {
     function (err, results) {
       if (err) {
         console.log(err);
-        return res.status(err.status).send(err.message);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
       } else {
         console.log(results);
         if (results.status === 200) {
@@ -22,10 +25,11 @@ router.post("/customer", (req, res) => {
             httpOnly: false,
             path: "/",
           });
-          return res.status(results.status).send(results.data);
-        } else {
-          return res.status(results.status).send(results.errors);
         }
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
       }
     }
   );
@@ -96,7 +100,10 @@ router.post("/restaurant", (req, res) => {
     function (err, results) {
       if (err) {
         console.log(err);
-        return res.status(err.status).send(err.message);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
       } else {
         console.log(results);
         if (results.status === 200) {
@@ -106,10 +113,11 @@ router.post("/restaurant", (req, res) => {
             httpOnly: false,
             path: "/",
           });
-          return res.status(results.status).send(results.data);
-        } else {
-          return res.status(results.status).send(results.errors);
         }
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
       }
     }
   );

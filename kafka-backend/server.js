@@ -3,6 +3,9 @@ var connection = new require("./kafka/connection");
 //topics files
 const signupService = require("./services/signup");
 const loginService = require("./services/login");
+const restaurantService = require("./services/restaurant");
+const customerService = require("./services/customer");
+const imageService = require("./services/image");
 
 const mongoose = require("mongoose");
 
@@ -30,7 +33,7 @@ connectMongoDB();
 function handleTopicRequest(topic_name, fname) {
   var consumer = connection.getConsumer(topic_name);
   var producer = connection.getProducer();
-  console.log(producer);
+  //console.log(producer);
   console.log("server is running ");
   consumer.on("message", function (message) {
     console.log("message received for " + topic_name + " ", fname);
@@ -38,7 +41,9 @@ function handleTopicRequest(topic_name, fname) {
     var data = JSON.parse(message.value);
     fname.handle_request(data.data, (err, res) => {
       console.log("in callback, producer:");
-      console.log(producer);
+      console.log(err);
+      console.log(res);
+      //console.log(producer);
       //response(data, res, err, producer);
       var payloads = [
         {
@@ -55,6 +60,7 @@ function handleTopicRequest(topic_name, fname) {
         if (err) {
           console.log("Error when producer sending data", err);
         } else {
+          console.log("response");
           console.log(data);
         }
       });
@@ -91,3 +97,6 @@ function response(data, res, producer) {
 //second argument is a function that will handle this topic request
 handleTopicRequest("signup-topic", signupService);
 handleTopicRequest("login-topic", loginService);
+handleTopicRequest("restaurant-topic", restaurantService);
+handleTopicRequest("customer-topic", customerService);
+handleTopicRequest("image-topic", imageService);

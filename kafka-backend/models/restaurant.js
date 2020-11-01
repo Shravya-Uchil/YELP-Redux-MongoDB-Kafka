@@ -64,7 +64,7 @@ const restaurantSchema = new schema(
     restaurant_image: {
       type: String,
       trim: true,
-      default: "",
+      default: "default",
     },
     lat: {
       type: Number,
@@ -74,7 +74,10 @@ const restaurantSchema = new schema(
       type: Number,
       default: 0.0,
     },
-    menu_items: [{ type: mongoose.Schema.Types.ObjectId, ref: "MenuItem" }],
+    menu_item: [{ type: mongoose.Schema.Types.ObjectId, ref: "MenuItem" }],
+    menu_category: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "MenuCategory" },
+    ],
   },
   { versionKey: false }
 );

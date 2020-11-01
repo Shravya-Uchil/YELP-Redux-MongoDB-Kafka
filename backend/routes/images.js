@@ -4,6 +4,7 @@ const db = require("../mysqlDB.js");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
+const kafka = require("../kafka/client");
 
 const customerStorage = multer.diskStorage({
   destination: path.join(__dirname, "..") + "/public/uploads/customer",
@@ -27,22 +28,33 @@ const customerUpload = multer({
 router.post("/customer/:customer_id", (req, res) => {
   customerUpload(req, res, function (err) {
     if (!err) {
-      let sql = `UPDATE customer SET cust_image = '${req.file.filename}' WHERE customer_id = ${req.params.customer_id}`;
-      db.query(sql, (err, result) => {
-        if (err) {
-          res.writeHead(500, {
-            "Content-Type": "text/plain",
-          });
-          res.end("Database Error");
+      kafka.make_request(
+        "image-topic",
+        {
+          path: "upload_customer_image",
+          body: req.params,
+          filename: req.file.filename,
+        },
+        function (err, results) {
+          if (err) {
+            console.log(err);
+            res.writeHead(err.status, {
+              "Content-Type": "text/plain",
+            });
+            res.end(err.data);
+          } else {
+            res.writeHead(results.status, {
+              "Content-Type": "text/plain",
+            });
+            res.end(results.data);
+          }
         }
-      });
-      res.writeHead(200, {
+      );
+    } else {
+      res.writeHead(500, {
         "Content-Type": "text/plain",
       });
-      res.end(req.file.filename);
-    } else {
-      console.log("Error!");
-      console.log(err);
+      res.end("Error uploading image");
     }
   });
 });
@@ -84,21 +96,34 @@ const restaurantUpload = multer({
 router.post("/restaurant/:restaurant_id", (req, res) => {
   restaurantUpload(req, res, function (err) {
     if (!err) {
-      let sql = `UPDATE restaurant SET restaurant_image = '${req.file.filename}' WHERE restaurant_id = ${req.params.restaurant_id}`;
-      db.query(sql, (err, result) => {
-        if (err) {
-          res.writeHead(500, {
-            "Content-Type": "text/plain",
-          });
-          res.end("Database Error");
+      kafka.make_request(
+        "image-topic",
+        {
+          path: "upload_restaurant_image",
+          body: req.params,
+          filename: req.file.filename,
+        },
+        function (err, results) {
+          if (err) {
+            console.log(err);
+            res.writeHead(err.status, {
+              "Content-Type": "text/plain",
+            });
+            res.end(err.data);
+          } else {
+            res.writeHead(results.status, {
+              "Content-Type": "text/plain",
+            });
+            res.end(results.data);
+          }
         }
-      });
-      res.writeHead(200, {
-        "Context-Type": "text/plain",
-      });
-      res.end(req.file.filename);
+      );
     } else {
       console.log("Error!");
+      res.writeHead(500, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Error uploading image");
     }
   });
 });
@@ -133,24 +158,33 @@ const itemUpload = multer({
 router.post("/item/:item_id", (req, res) => {
   itemUpload(req, res, function (err) {
     if (!err) {
-      if (req.params.item_id !== "undefined") {
-        let sql = `UPDATE menu_items SET item_image = '${req.file.filename}' WHERE item_id = ${req.params.item_id}`;
-
-        db.query(sql, (err, result) => {
+      kafka.make_request(
+        "image-topic",
+        {
+          path: "upload_item_image",
+          body: req.params,
+          filename: req.file.filename,
+        },
+        function (err, results) {
           if (err) {
-            res.writeHead(500, {
+            console.log(err);
+            res.writeHead(err.status, {
               "Content-Type": "text/plain",
             });
-            res.end("Database Error");
+            res.end(err.data);
+          } else {
+            res.writeHead(results.status, {
+              "Content-Type": "text/plain",
+            });
+            res.end(results.data);
           }
-        });
-      }
-      res.writeHead(200, {
-        "Context-Type": "text/plain",
-      });
-      res.end(req.file.filename);
+        }
+      );
     } else {
-      console.log(err);
+      res.writeHead(500, {
+        "Content-Type": "text/plain",
+      });
+      res.end("Error uploading image");
     }
   });
 });

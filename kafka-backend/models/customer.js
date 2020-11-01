@@ -47,7 +47,7 @@ const customerSchema = new schema(
     cust_image: {
       type: String,
       trim: true,
-      default: "",
+      default: "default",
     },
     dob: {
       type: Date,
