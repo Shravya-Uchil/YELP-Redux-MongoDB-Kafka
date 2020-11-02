@@ -41,7 +41,7 @@ class Item extends Component {
   };
 
   addToCart = (e) => {
-    let item_id = this.props.menu_item.item_id;
+    let item_id = this.props.menu_item.item_id || this.props.menu_item._id;
     let cartList = [];
     /*if (
       parseInt(localStorage.getItem("selected_restaurant_id")) !==
@@ -81,7 +81,7 @@ class Item extends Component {
   };
 
   removeFromCart = (e) => {
-    let item_id = this.props.menu_item.item_id;
+    let item_id = this.props.menu_item.item_id || this.props.menu_item._id;
     let cartList = [];
 
     if (localStorage.getItem("cart_list")) {
@@ -138,7 +138,7 @@ class Item extends Component {
         <div className="d-flex flex-row">
           <Button
             onClick={this.openModal}
-            name={this.props.menu_item.item_id}
+            name={this.props.menu_item.item_id || this.props.menu_item._id}
             style={{ background: "#d32323" }}
           >
             Add to Cart
@@ -146,7 +146,7 @@ class Item extends Component {
           &nbsp; &nbsp;
           <Button
             onClick={this.removeFromCart}
-            name={this.props.menu_item.item_id}
+            name={this.props.menu_item.item_id || this.props.menu_item._id}
             style={{ background: "#d32323" }}
           >
             Remove from Cart
@@ -161,7 +161,7 @@ class Item extends Component {
           <Link to={{ pathname: "/additem", state: this.props.menu_item }}>
             <Button
               variant="primary"
-              name={this.props.menu_item.item_id}
+              name={this.props.menu_item.item_id || this.props.menu_item._id}
               style={{ background: "#d32323" }}
             >
               Edit
@@ -219,7 +219,7 @@ class Item extends Component {
               Quantity:{" "}
               <input
                 type="number"
-                name={this.props.menu_item.item_id}
+                name={this.props.menu_item.item_id || this.props.menu_item._id}
                 min="1"
                 max="20"
                 width="10%"

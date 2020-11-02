@@ -59,11 +59,11 @@ class CustomerHome extends Component {
       console.log("Customer response");
       console.log(nextProps);
       this.setState({
-        customer: nextProps,
+        customer: nextProps.customer,
       });
       let addr = "San Jose";
-      if (nextProps.city != "") {
-        addr = nextProps.city;
+      if (nextProps.customer.city != "") {
+        addr = nextProps.customer.city;
       }
       Geocode.fromAddress(addr).then(
         (resp) => {
@@ -97,8 +97,8 @@ class CustomerHome extends Component {
         });
       } else {
         this.setState({
-          allRestaurants: nextProps,
-          filteredRestaurants: nextProps,
+          allRestaurants: nextProps.restaurant,
+          filteredRestaurants: nextProps.restaurant,
           noRecords: false,
           search_input: "",
         });
@@ -110,7 +110,7 @@ class CustomerHome extends Component {
   }
 
   getCustomerInfo = () => {
-    getCustomerDetailsHome();
+    this.props.getCustomerDetailsHome();
     /*axios
       .get(
         `${serverAddress}/yelp/profile/customerById/${localStorage.getItem(
@@ -158,7 +158,7 @@ class CustomerHome extends Component {
   };
 
   componentDidMount() {
-    searchRestaurantsHome("_");
+    this.props.searchRestaurantsHome("_");
     /*axios
       .get(`${serverAddress}/yelp/restaurant/search/_`)
       .then((response) => {
@@ -255,7 +255,7 @@ class CustomerHome extends Component {
       this.setState({
         search_input: searchInput,
       });
-      searchRestaurantsHome(searchInput);
+      this.props.searchRestaurantsHome(searchInput);
       /*axios
         .get(`${serverAddress}/yelp/restaurant/search/${searchInput}`)
         .then((response) => {

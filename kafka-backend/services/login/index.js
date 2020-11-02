@@ -14,9 +14,9 @@ let handle_request = async (msg, callback) => {
       });
       if (!customer) {
         console.log("no customer found");
-        err.status = 401;
-        err.data = "NO_CUSTOMER";
-        return callback(err, null);
+        response.status = 200;
+        response.data = "NO_CUSTOMER";
+        return callback(null, response);
       } else {
         let isValidPassword = await bcrypt.compare(
           msg.body.password,
@@ -36,9 +36,9 @@ let handle_request = async (msg, callback) => {
           return callback(null, response);
         } else {
           console.log("incorrect password");
-          err.status = 401;
-          err.data = "INCORRECT_PASSWORD";
-          return callback(err, null);
+          response.status = 200;
+          response.data = "INCORRECT_PASSWORD";
+          return callback(null, response);
         }
       }
     } else if (msg.path == "restaurant_login") {
@@ -46,9 +46,9 @@ let handle_request = async (msg, callback) => {
         email_id: msg.body.email_id,
       });
       if (!restaurant) {
-        err.status = 401;
-        err.data = "NO_CUSTOMER";
-        return callback(err, null);
+        response.status = 200;
+        response.data = "NO_CUSTOMER";
+        return callback(null, response);
       } else {
         let isValidPassword = await bcrypt.compare(
           msg.body.password,
@@ -66,9 +66,9 @@ let handle_request = async (msg, callback) => {
           response.data = JSON.stringify(restaurantObject);
           return callback(null, response);
         } else {
-          err.status = 401;
-          err.data = "INCORRECT_PASSWORD";
-          return callback(err, null);
+          response.status = 200;
+          response.data = "INCORRECT_PASSWORD";
+          return callback(null, response);
         }
       }
     } else {

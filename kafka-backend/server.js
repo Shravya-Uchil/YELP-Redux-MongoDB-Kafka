@@ -6,6 +6,8 @@ const loginService = require("./services/login");
 const restaurantService = require("./services/restaurant");
 const customerService = require("./services/customer");
 const imageService = require("./services/image");
+const eventService = require("./services/event");
+const menuService = require("./services/menu");
 
 const mongoose = require("mongoose");
 
@@ -100,3 +102,5 @@ handleTopicRequest("login-topic", loginService);
 handleTopicRequest("restaurant-topic", restaurantService);
 handleTopicRequest("customer-topic", customerService);
 handleTopicRequest("image-topic", imageService);
+handleTopicRequest("event-topic", eventService);
+handleTopicRequest("menu-topic", menuService);

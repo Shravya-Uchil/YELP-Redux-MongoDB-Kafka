@@ -4,7 +4,7 @@ const Customer = require("../../models/customer");
 const MenuItem = require("../../models/menu_item");
 
 let handle_request = async (msg, callback) => {
-  console.log("Customer service, path= ", msg.path);
+  console.log("Image service, path= ", msg.path);
   switch (msg.path) {
     case "upload_customer_image":
       uploadCustomerImage(msg, callback);
@@ -13,6 +13,8 @@ let handle_request = async (msg, callback) => {
       uploadRestaurantImage(msg, callback);
       break;
     case "upload_item_image":
+      uploadItemImage(msg, callback);
+      break;
     case "upload_event_image":
     default:
       callback(null, { status: 500, data: "no path found" });
@@ -27,7 +29,7 @@ async function uploadCustomerImage(msg, callback) {
     let customer = await Customer.findById(msg.body.customer_id);
     if (customer) {
       customer.cust_image = msg.filename;
-      customerSave = await customer.save();
+      let customerSave = await customer.save();
       if (customerSave) {
         response.status = 200;
         response.data = msg.filename;
@@ -58,8 +60,39 @@ async function uploadRestaurantImage(msg, callback) {
     let restaurant = await Restaurant.findById(msg.body.restaurant_id);
     if (restaurant) {
       restaurant.restaurant_image = msg.filename;
-      restaurantSave = await restaurant.save();
+      let restaurantSave = await restaurant.save();
       if (restaurantSave) {
+        response.status = 200;
+        response.data = msg.filename;
+        return callback(null, response);
+      } else {
+        err.status = 401;
+        err.data = "NO_RECORD";
+        return callback(err, null);
+      }
+    } else {
+      err.status = 401;
+      err.data = "NO_RECORD";
+      return callback(err, null);
+    }
+  } catch (error) {
+    console.log(error);
+    err.status = 500;
+    err.data = "Error in Data";
+    return callback(err, null);
+  }
+}
+
+async function uploadItemImage(msg, callback) {
+  let err = {};
+  let response = {};
+  console.log("Upload item image: ", msg);
+  try {
+    let item = await MenuItem.findById(msg.body.item_id);
+    if (item) {
+      item.item_image = msg.filename;
+      let itemSave = await item.save();
+      if (itemSave) {
         response.status = 200;
         response.data = msg.filename;
         return callback(null, response);

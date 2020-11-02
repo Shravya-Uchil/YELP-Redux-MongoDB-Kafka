@@ -31,9 +31,12 @@ class AddItem extends Component {
   };
 
   componentDidMount() {
+    console.log("mountt");
+    console.log(this.props);
     if (this.props.location.state) {
       var item = {
-        item_id: this.props.location.state.item_id,
+        item_id:
+          this.props.location.state.item_id || this.props.location.state._id,
         item_name: this.props.location.state.item_name,
         item_price: this.props.location.state.item_price,
         item_description: this.props.location.state.item_description,
@@ -47,14 +50,14 @@ class AddItem extends Component {
     if (this.props.location.state) {
       axios
         .get(
-          `${serverAddress}/yelp/menu/categoryById/${this.props.location.state.category_id}`
+          `${serverAddress}/yelp/menu/categoryById/${this.props.location.state.item_category}`
         )
         .then((response) => {
           console.log("response");
-          console.log(response.data[0]);
-          if (response.data[0]) {
+          console.log(response.data);
+          if (response.data) {
             this.setState({
-              item_category: response.data[0].category_name,
+              item_category: response.data.category_name,
             });
           }
           console.log("Category get");

@@ -50,16 +50,25 @@ async function searchRestaurant(msg, callback) {
           { description: new RegExp(msg.body.search_str, "gi") },
           { cuisine: new RegExp(msg.body.search_str, "gi") },
         ],
-      })
+      });
+      await restaurant
         .populate({
           path: "menu_category",
           match: { category_name: new RegExp(msg.body.search_str, "gi") },
+          select: "category_name _id",
         })
         .populate({
           path: "menu_item",
-          match: { item_name: new RegExp(msg.body.search_str, "gi") },
-          match: { item_description: new RegExp(msg.body.search_str, "gi") },
-        });
+          match: {
+            $OR: [
+              { item_name: new RegExp(msg.body.search_str, "gi") },
+              { item_description: new RegExp(msg.body.search_str, "gi") },
+            ],
+          },
+          select:
+            "item_name item_price item_description item_category item_image item_ingredients _id",
+        })
+        .execPopulate();
     } else {
       console.log("Find all restaurants");
       restaurant = await Restaurant.find();
@@ -92,13 +101,20 @@ async function getRestaurantById(msg, callback) {
     let restaurant = await Restaurant.findById(msg.body.restaurant_id);
     if (restaurant) {
       response.status = 200;
-      renameKey(restaurant, "_id", "restaurant_id");
+      //console.log("BLAAA");
+      //console.log(restaurant);
+      //restaurant[`restaurant_id`] = restaurant[`_id`];
+      //delete restaurant[`_id`];
+      //let arr = [restaurant];
+      //arr.forEach((obj) => renameKey(obj, "_id", "restaurant_id"));
+      //renameKey(restaurant, "_id", "restaurant_id");
+      //console.log(arr[0]);
       response.data = JSON.stringify(restaurant);
       return callback(null, response);
     } else {
-      err.status = 401;
-      err.data = "NO_RECORD";
-      return callback(err, null);
+      response.status = 200;
+      response.data = "NO_RECORD";
+      return callback(null, response);
     }
   } catch (error) {
     console.log(error);
@@ -135,15 +151,15 @@ async function updateRestaurant(msg, callback) {
         response.data = "RESTAURANT_UPDATED";
         return callback(null, response);
       } else {
-        err.status = 500;
-        err.data = "Error in saving data";
-        return callback(err, null);
+        response.status = 500;
+        response.data = "Error in saving data";
+        return callback(null, response);
       }
     } else {
       console.log(error);
-      err.status = 401;
-      err.data = "NO_RECORD";
-      return callback(err, null);
+      response.status = 401;
+      response.data = "NO_RECORD";
+      return callback(null, response);
     }
   } catch (error) {
     console.log(error);
@@ -158,18 +174,25 @@ async function getRestaurantReviewById(msg, callback) {
   let response = {};
   console.log("Get restaurant review by id: ", msg);
   try {
-    let review = await Review.find({
-      restaurant_id: msg.body.restaurant_id,
-    });
-    if (review) {
-      response.status = 200;
-      review.forEach((obj) => renameKey(obj, "_id", "review_id"));
-      response.data = JSON.stringify(review);
-      return callback(null, response);
+    let restaurant = await Restaurant.findById(msg.body.restaurant_id);
+    if (restaurant) {
+      let review = await Review.find({
+        restaurant_id: restaurant._id,
+      });
+      if (review) {
+        response.status = 200;
+        review.forEach((obj) => renameKey(obj, "_id", "review_id"));
+        response.data = JSON.stringify(review);
+        return callback(null, response);
+      } else {
+        response.status = 200;
+        response.data = "NO_RECORD";
+        return callback(null, response);
+      }
     } else {
-      err.status = 401;
-      err.data = "NO_RECORD";
-      return callback(err, null);
+      response.status = 500;
+      response.data = "Data error";
+      return callback(null, response);
     }
   } catch (error) {
     console.log(error);
@@ -188,9 +211,9 @@ async function addRestaurantReview(msg, callback) {
     let restaurant = await Restaurant.findById(msg.restaurant_id);
     let customer = await Customer.findById(msg.customer_id);
     if (!restaurant || !customer) {
-      err.status = 500;
-      err.data = "No restaurant or customer found";
-      return callback(err, null);
+      response.status = 500;
+      response.data = "No restaurant or customer found";
+      return callback(null, response);
     } else {
       let reviewExists = await Review.findOne({
         $and: [
@@ -213,14 +236,14 @@ async function addRestaurantReview(msg, callback) {
           response.data = "REVIEW_ADDED";
           return callback(null, response);
         } else {
-          err.status = 500;
-          err.data = "Error in Data";
-          return callback(err, null);
+          response.status = 500;
+          response.data = "Error in Data";
+          return callback(null, response);
         }
       } else {
-        err.status = 401;
-        err.data = "RESTAURANT_EXISTS";
-        return callback(err, null);
+        response.status = 200;
+        response.data = "RESTAURANT_EXISTS";
+        return callback(null, response);
       }
     }
   } catch (error) {
@@ -249,9 +272,9 @@ async function hasReviewed(msg, callback) {
       response.data = JSON.stringify(review);
       return callback(null, response);
     } else {
-      err.status = 401;
-      err.data = "NO_RECORD";
-      return callback(err, null);
+      response.status = 200;
+      response.data = "NO_RECORD";
+      return callback(null, response);
     }
   } catch (error) {
     console.log(error);

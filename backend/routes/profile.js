@@ -95,69 +95,45 @@ router.post("/customer", async (req, res) => {
 });
 
 router.get("/restaurant/:restaurant_id", (req, res) => {
-  let sql_query = `CALL get_restaurant_byId('${req.params.restaurant_id}');`;
-  db.query(sql_query, (err, result) => {
-    if (err) {
-      console.log(err);
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("Error in Data");
+  kafka.make_request(
+    "restaurant-topic",
+    { path: "restaurant", body: req.params },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
     }
-    if (result && result.length > 0 && result[0][0]) {
-      res.writeHead(200, {
-        "Content-Type": "text/plain",
-      });
-      res.end(JSON.stringify(result[0]));
-    }
-  });
+  );
 });
 
 router.post("/restaurant", async (req, res) => {
-  var encryptedPassword = "NULL";
-  try {
-    if (req.body.password && req.body.password !== "") {
-      encryptedPassword =
-        "'" + (await bcrypt.hash(req.body.password, 12)) + "'";
-    }
-    let sql = `CALL update_restaurant('${req.body.restaurant_id}', '${req.body.restaurant_name}', ${encryptedPassword}, '${req.body.zip_code}' ,'${req.body.contact}', '${req.body.description}', NULL, NULL, '${req.body.cuisine}', '${req.body.curbside_pickup}', '${req.body.dine_in}', '${req.body.yelp_delivery}');`;
-    db.query(sql, (err, result) => {
+  kafka.make_request(
+    "restaurant-topic",
+    { path: "update_restaurant", body: req.body },
+    function (err, results) {
       if (err) {
-        console.log("Error:");
         console.log(err);
-        res.writeHead(500, {
+        res.writeHead(err.status, {
           "Content-Type": "text/plain",
         });
-        res.end("Error in Data");
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
       }
-      if (
-        result &&
-        result.length > 0 &&
-        result[0][0].status === "RESTAURANT_UPDATED"
-      ) {
-        res.writeHead(200, {
-          "Content-Type": "text/plain",
-        });
-        res.end(result[0][0].status);
-      } else if (
-        result &&
-        result.length > 0 &&
-        result[0][0].status === "NO_RECORD"
-      ) {
-        res.writeHead(401, {
-          "Content-Type": "text/plain",
-        });
-        res.end(result[0][0].status);
-      }
-    });
-  } catch (err) {
-    console.log("Error in encryption:");
-    console.log(err);
-    res.writeHead(500, {
-      "Content-Type": "text/plain",
-    });
-    res.end("Error in encrypting password!!");
-  }
+    }
+  );
 });
 
 module.exports = router;

@@ -20,6 +20,7 @@ class RestaurantHome extends Component {
   }
 
   componentWillMount() {
+    console.log("Get restaurant");
     axios
       .get(
         `${serverAddress}/yelp/profile/restaurant/${localStorage.getItem(
@@ -27,9 +28,11 @@ class RestaurantHome extends Component {
         )}`
       )
       .then((response) => {
-        if (response.data[0]) {
+        console.log("get res resp");
+        console.log(response);
+        if (response.data) {
           this.setState({
-            restaurant: response.data[0],
+            restaurant: response.data,
           });
         }
       })
@@ -46,12 +49,13 @@ class RestaurantHome extends Component {
         )}`
       )
       .then((response) => {
+        console.log("Category get");
+        console.log(response);
         if (response.data[0]) {
           this.setState({
             menu_category: response.data,
           });
         }
-        console.log("Category get");
       })
       .catch((err) => {
         if (err.response && err.response.data) {
@@ -69,6 +73,7 @@ class RestaurantHome extends Component {
       )
       .then((response) => {
         console.log("Items get");
+        console.log(response);
         //if (response.data[0]) {
         this.setState({
           menu_items: response.data,
@@ -120,7 +125,9 @@ class RestaurantHome extends Component {
       redirectVar = <Redirect to="/login" />;
     }
     if (this.state && this.state.restaurant) {
+      console.log("state");
       let restaurant = this.state.restaurant;
+      console.log(restaurant);
       let resImageSrc = `${serverAddress}/yelp/images/restaurant/${this.state.restaurant.restaurant_image}`;
       restaurantDetails = (
         <Card

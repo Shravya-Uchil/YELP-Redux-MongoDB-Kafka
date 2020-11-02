@@ -45,11 +45,14 @@ class Restaurant extends Component {
     console.log("mount");
     localStorage.removeItem("cart_list");
     if (this.props.location.state) {
+      let id =
+        this.props.location.state.restaurant_id ||
+        this.props.location.state._id;
       axios
         .get(
           `${serverAddress}/yelp/restaurant/hasReviewed/${localStorage.getItem(
             "customer_id"
-          )}/${this.props.location.state.restaurant_id}`
+          )}/${id}`
         )
         .then((response) => {
           console.log("response");
@@ -68,19 +71,17 @@ class Restaurant extends Component {
         });
 
       document.title = this.props.location.state.restaurant_name;
-      localStorage.setItem(
-        "selected_restaurant_id",
-        this.props.location.state.restaurant_id
-      );
+      localStorage.setItem("selected_restaurant_id", id);
     }
   }
 
   getAllCategories = () => {
     if (this.props.location.state) {
+      let id =
+        this.props.location.state.restaurant_id ||
+        this.props.location.state._id;
       axios
-        .get(
-          `${serverAddress}/yelp/menu/category/${this.props.location.state.restaurant_id}`
-        )
+        .get(`${serverAddress}/yelp/menu/category/${id}`)
         .then((response) => {
           if (response.data[0]) {
             this.setState({
@@ -99,10 +100,11 @@ class Restaurant extends Component {
 
   getAllMenuItems = () => {
     if (this.props.location.state) {
+      let id =
+        this.props.location.state.restaurant_id ||
+        this.props.location.state._id;
       return axios
-        .get(
-          `${serverAddress}/yelp/menu/items/${this.props.location.state.restaurant_id}`
-        )
+        .get(`${serverAddress}/yelp/menu/items/${id}`)
         .then((response) => {
           console.log("Items get");
           //if (response.data[0]) {
@@ -159,7 +161,9 @@ class Restaurant extends Component {
       if (this.props.location.state) {
         let data = {
           customer_id: localStorage.getItem("customer_id"),
-          restaurant_id: this.props.location.state.restaurant_id,
+          restaurant_id:
+            this.props.location.state.restaurant_id ||
+            this.props.location.state._id,
           order_status: "New Order",
           order_cost: total_cost,
           order_type: this.state.order_type,
@@ -202,7 +206,9 @@ class Restaurant extends Component {
     axios.defaults.withCredentials = true;
     if (this.props.location.state) {
       var data = {
-        restaurant_id: this.props.location.state.restaurant_id,
+        restaurant_id:
+          this.props.location.state.restaurant_id ||
+          this.props.location.state._id,
         customer_id: localStorage.getItem("customer_id"),
         review_text: this.state.review_text,
         review_rating: this.state.review_rating || 0,

@@ -13,9 +13,9 @@ let handle_request = async (msg, callback) => {
         email_id: msg.body.email_id,
       });
       if (customer) {
-        err.status = 401;
-        err.data = "CUSTOMER_EXISTS";
-        return callback(err, null);
+        response.status = 200;
+        response.data = "CUSTOMER_EXISTS";
+        return callback(null, response);
       } else {
         encryptedPassword = await bcrypt.hash(msg.body.password, 12);
         let customer = new Customer({
@@ -29,9 +29,9 @@ let handle_request = async (msg, callback) => {
           response.data = "CUSTOMER_ADDED";
           return callback(null, response);
         } else {
-          err.status = 500;
-          err.data = "Error in Data";
-          return callback(err, null);
+          response.status = 500;
+          response.data = "Error in Data";
+          return callback(null, response);
         }
       }
     } catch (error) {
@@ -46,9 +46,9 @@ let handle_request = async (msg, callback) => {
         email_id: msg.body.email_id,
       });
       if (restaurant) {
-        err.status = 401;
-        err.data = "RESTAURANT_EXISTS";
-        return callback(err, null);
+        response.status = 200;
+        response.data = "RESTAURANT_EXISTS";
+        return callback(null, response);
       } else {
         encryptedPassword = await bcrypt.hash(msg.body.password, 12);
         let restaurant = new Restaurant({
@@ -65,9 +65,9 @@ let handle_request = async (msg, callback) => {
           response.data = "RESTAURANT_ADDED";
           return callback(null, response);
         } else {
-          err.status = 500;
-          err.data = "Error in Data";
-          return callback(err, null);
+          response.status = 500;
+          response.data = "Error in Data";
+          return callback(null, response);
         }
       }
     } catch (error) {

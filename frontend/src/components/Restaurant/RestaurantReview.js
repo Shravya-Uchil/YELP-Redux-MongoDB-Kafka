@@ -16,9 +16,9 @@ class RestaurantReview extends Component {
   componentDidMount() {
     let res_id = null;
     if (this.props.restaurant_details) {
-      res_id = this.props.restaurant_details.restaurant_id;
+      res_id = this.props.restaurant_details._id;
     } else {
-      res_id = this.props.location.state.restaurant_id;
+      res_id = this.props.location.state._id;
     }
     axios
       .get(`${serverAddress}/yelp/restaurant/restaurantReview/${res_id}`)

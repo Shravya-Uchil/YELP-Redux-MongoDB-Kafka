@@ -80,6 +80,12 @@ const customerSchema = new schema(
       trim: true,
       default: "",
     },
+    event: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Event",
+      },
+    ],
   },
   { versionKey: false }
 );

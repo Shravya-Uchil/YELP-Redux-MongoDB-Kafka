@@ -59,7 +59,7 @@ KafkaRPC.prototype.makeRequest = function (topic_name, content, callback) {
         console.log("error");
         console.log(err);
       } else {
-        console.log("data");
+        console.log("send data");
         console.log(data);
       }
     });
@@ -89,6 +89,8 @@ KafkaRPC.prototype.setupResponseQueue = function (producer, topic_name, next) {
       if (data.err) {
         entry.callback(data.err, null);
       } else {
+        console.log("recv data");
+        console.log(data);
         entry.callback(null, data.data);
       }
     }

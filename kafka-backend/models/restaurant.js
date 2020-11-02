@@ -78,6 +78,12 @@ const restaurantSchema = new schema(
     menu_category: [
       { type: mongoose.Schema.Types.ObjectId, ref: "MenuCategory" },
     ],
+    event: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Event",
+      },
+    ],
   },
   { versionKey: false }
 );
