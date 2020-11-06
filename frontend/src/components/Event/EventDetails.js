@@ -18,7 +18,7 @@ class EventDetails extends Component {
     axios.defaults.withCredentials = true;
 
     var data = {
-      event_id: this.props.location.state.event_id,
+      event_id: this.props.location.state._id,
       customer_id: localStorage.getItem("customer_id"),
       restaurant_id: this.props.location.state.restaurant_id,
     };
@@ -26,6 +26,9 @@ class EventDetails extends Component {
     //var data = Object.assign({}, this.state);
     console.log("Register to event");
     console.log(data);
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .post(`${serverAddress}/yelp/event/register`, data)
       .then((response) => {
@@ -43,17 +46,20 @@ class EventDetails extends Component {
 
   componentDidMount() {
     if (localStorage.getItem("customer_id")) {
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       axios
         .get(
           `${serverAddress}/yelp/event/customer/isRegistered/${localStorage.getItem(
             "customer_id"
-          )}/${this.props.location.state.event_id}`
+          )}/${this.props.location.state._id}`
         )
         .then((response) => {
           console.log("response");
           console.log(response.data);
           if (response.data) {
-            if (response.data[0].result === "REGISTERED") {
+            if (response.data.result === "REGISTERED") {
               this.setState({
                 isRegistered: 1,
               });
@@ -65,14 +71,17 @@ class EventDetails extends Component {
           console.log(error);
         });
     } else {
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       axios
         .get(
-          `${serverAddress}/yelp/event/restaurant/registration/${this.props.location.state.event_id}`
+          `${serverAddress}/yelp/event/restaurant/registration/${this.props.location.state._id}`
         )
         .then((response) => {
           console.log("response cust");
           console.log(response.data);
-          if (response.data) {
+          if (response.data && response.data.result != "NO_RECORD") {
             this.setState({
               registered_customers: response.data,
             });
@@ -120,6 +129,8 @@ class EventDetails extends Component {
         );
       }
     } else {
+      console.log("this.state");
+      console.log(this.state);
       if (this.state && this.state.registered_customers) {
         registered_customers = this.state.registered_customers.map((cust) => {
           var imageSrc = `${serverAddress}/yelp/images/customer/${cust.cust_image}`;

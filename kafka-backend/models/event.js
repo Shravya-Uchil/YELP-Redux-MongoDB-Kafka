@@ -38,7 +38,6 @@ const eventSchema = new schema(
     restaurant_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Restaurant",
-      required: true,
     },
     customer_id: [
       {

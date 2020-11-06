@@ -11,6 +11,9 @@ export const customerLogin = (loginDetails, type) => (dispatch) => {
     url = `${serverAddress}/yelp/login/restaurant`;
   }
   console.log("URL: " + url);
+  axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    "token"
+  );
   axios
     .post(url, loginDetails)
     .then((response) =>

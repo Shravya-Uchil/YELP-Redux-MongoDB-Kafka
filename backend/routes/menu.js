@@ -4,8 +4,9 @@ const pool = require("../mysqlDB.js");
 const path = require("path");
 const fs = require("fs");
 const kafka = require("../kafka/client");
+const { checkAuth } = require("../config/passport");
 
-router.get("/category/:res_id", (req, res) => {
+router.get("/category/:res_id", checkAuth, (req, res) => {
   console.log("get category " + req.params.res_id);
   kafka.make_request(
     "menu-topic",
@@ -27,7 +28,7 @@ router.get("/category/:res_id", (req, res) => {
   );
 });
 
-router.get("/categoryById/:category_id", (req, res) => {
+router.get("/categoryById/:category_id", checkAuth, (req, res) => {
   console.log("get category by id " + req.params.category_id);
   kafka.make_request(
     "menu-topic",
@@ -49,7 +50,7 @@ router.get("/categoryById/:category_id", (req, res) => {
   );
 });
 
-router.get("/items/:res_id", (req, res) => {
+router.get("/items/:res_id", checkAuth, (req, res) => {
   console.log("get items " + req.params.res_id);
   kafka.make_request(
     "menu-topic",
@@ -71,7 +72,7 @@ router.get("/items/:res_id", (req, res) => {
   );
 });
 
-router.post("/item", (req, res) => {
+router.post("/item", checkAuth, (req, res) => {
   console.log("post item");
   console.log(req.body);
   kafka.make_request(

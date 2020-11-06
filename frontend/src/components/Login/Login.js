@@ -7,6 +7,7 @@ import { connect } from "react-redux";
 import { customerLogin } from "../../actions/loginActions";
 import NavBar from "../LandingPage/Navbar.js";
 import serverAddress from "../../config";
+import jwt_decode from "jwt-decode";
 
 //Define a Login Component
 class Login extends Component {
@@ -71,30 +72,36 @@ class Login extends Component {
 
   render() {
     console.log("Login render");
+    console.log(this.props);
     let message = "";
     let redirectVar = null;
-    if (this.props.customer && this.props.customer.customer_id) {
-      if (this.props.customer.login_type === 0) {
-        localStorage.setItem("email_id", this.props.customer.email_id);
-        localStorage.setItem("customer_id", this.props.customer.customer_id);
-        localStorage.setItem("login_type", "customer");
-        redirectVar = <Redirect to="/home" />;
-      } else {
-        localStorage.setItem("email_id", this.props.customer.email_id);
-        localStorage.setItem("restaurant_id", this.props.customer.customer_id);
-        localStorage.setItem("login_type", "restaurant");
-        redirectVar = <Redirect to="/home" />;
-      }
-    } else if (
-      this.props.customer === "NO_CUSTOMER" &&
-      this.state.loginDoneOnce
-    ) {
+    if (this.props.customer === "NO_CUSTOMER" && this.state.loginDoneOnce) {
       message = "Cannot recognize username or password!!!";
     } else if (
       this.props.customer === "INCORRECT_PASSWORD" &&
       this.state.loginDoneOnce
     ) {
       message = "Incorrect Password!!!";
+    } else if (
+      this.props.customer &&
+      this.props.customer.token &&
+      this.state.loginDoneOnce
+    ) {
+      var decoded = jwt_decode(this.props.customer.token.split(" ")[1]);
+      console.log("decoded token");
+      console.log(decoded);
+      localStorage.setItem("token", this.props.customer.token);
+      if (decoded.login_type === 0) {
+        localStorage.setItem("email_id", decoded.email_id);
+        localStorage.setItem("customer_id", decoded.customer_id);
+        localStorage.setItem("login_type", "customer");
+        redirectVar = <Redirect to="/home" />;
+      } else {
+        localStorage.setItem("email_id", decoded.email_id);
+        localStorage.setItem("restaurant_id", decoded.customer_id);
+        localStorage.setItem("login_type", "restaurant");
+        redirectVar = <Redirect to="/home" />;
+      }
     }
     return (
       <div>

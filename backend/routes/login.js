@@ -1,8 +1,17 @@
 const express = require("express");
 const router = express.Router();
+
+// Authentication
+var jwt = require("jsonwebtoken");
+// var passport = require("passport");
+const { secret } = require("../config/config");
+// var requireAuth = passport.authenticate("jwt", { session: false });
+
 //const bcrypt = require("bcrypt");
 //const db = require("../mysqlDB.js");
 const kafka = require("../kafka/client");
+const { auth } = require("../config/passport");
+auth();
 
 router.post("/customer", (req, res) => {
   console.log("Customer login");
@@ -17,19 +26,54 @@ router.post("/customer", (req, res) => {
         });
         res.end(err.data);
       } else {
+        console.log("results");
         console.log(results);
         if (results.status === 200) {
-          req.session.user = results.data.email_id;
-          res.cookie("cookie", "admin", {
-            maxAge: 900000,
-            httpOnly: false,
-            path: "/",
+          if (
+            results.data === "INCORRECT_PASSWORD" ||
+            results.data === "NO_CUSTOMER"
+          ) {
+            console.log("whaataa??");
+            res.writeHead(results.status, {
+              "Content-Type": "text/plain",
+            });
+            res.end(results.data);
+          } else {
+            /*var payload = {
+              email_id: results.data.email_id,
+              customer_id: results.data.customer_id,
+              cust_name: results.data.cust_name,
+              login_type: results.data.login_type,
+            };*/
+            const payload = results.data;
+            console.log("******** login payload *********");
+            //console.log(results.data);
+            //console.log(payload);
+            const token = jwt.sign(JSON.parse(payload), secret, {
+              expiresIn: 7200, // expires in 2 hours
+            });
+            //var jwtToken = "JWT " + token;
+            req.session.user = results.data.email_id;
+            res.cookie("cookie", "admin", {
+              maxAge: 900000,
+              httpOnly: false,
+              path: "/",
+            });
+            // res.setHeader(jwtToken);
+            res.writeHead(results.status, {
+              "Content-Type": "text/plain",
+            });
+            let data = {
+              token: "JWT " + token,
+            };
+            res.end(JSON.stringify(data));
+          }
+        } else {
+          res.writeHead(results.status, {
+            "Content-Type": "text/plain",
           });
+          res.end(results.data);
         }
-        res.writeHead(results.status, {
-          "Content-Type": "text/plain",
-        });
-        res.end(results.data);
       }
     }
   );
@@ -107,17 +151,49 @@ router.post("/restaurant", (req, res) => {
       } else {
         console.log(results);
         if (results.status === 200) {
-          req.session.user = results.data.email_id;
-          res.cookie("cookie", "admin", {
-            maxAge: 900000,
-            httpOnly: false,
-            path: "/",
+          if (
+            results.data === "INCORRECT_PASSWORD" ||
+            results.data === "NO_CUSTOMER"
+          ) {
+            res.writeHead(results.status, {
+              "Content-Type": "text/plain",
+            });
+            res.end(results.data);
+          } else {
+            /*const payload = {
+              email_id: results.data.email_id,
+              customer_id: results.data.customer_id,
+              cust_name: results.data.cust_name,
+              login_type: results.data.login_type,
+            };*/
+            const payload = results.data;
+            console.log("******** login payload *********");
+            console.log(payload);
+            const token = jwt.sign(JSON.parse(payload), secret, {
+              expiresIn: 7200, // expires in 2 hours
+            });
+            //var jwtToken = "JWT " + token;
+            req.session.user = results.data.email_id;
+            res.cookie("cookie", "admin", {
+              maxAge: 900000,
+              httpOnly: false,
+              path: "/",
+            });
+            // res.setHeader(jwtToken);
+            res.writeHead(results.status, {
+              "Content-Type": "text/plain",
+            });
+            let data = {
+              token: "JWT " + token,
+            };
+            res.end(JSON.stringify(data));
+          }
+        } else {
+          res.writeHead(results.status, {
+            "Content-Type": "text/plain",
           });
+          res.end(results.data);
         }
-        res.writeHead(results.status, {
-          "Content-Type": "text/plain",
-        });
-        res.end(results.data);
       }
     }
   );

@@ -7,10 +7,20 @@ import Reviews from "../Restaurant/RestaurantReview.js";
 import ItemCard from "../Restaurant/Item";
 import { Link } from "react-router-dom";
 import serverAddress from "../../config";
+import {
+  getRestaurantDetailsHome,
+  getAllCategoriesRestaurant,
+  getMenuItemsRestaurant,
+} from "../../actions/restaurantHomeActions";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
 
 class RestaurantHome extends Component {
   constructor(props) {
     super(props);
+    // redux change
+    //this.state = {};
+
     this.ItemsForCategory = this.ItemsForCategory.bind(this);
     this.getAllMenuItems = this.getAllMenuItems.bind(this);
     this.getAllCategories = this.getAllCategories.bind(this);
@@ -21,6 +31,10 @@ class RestaurantHome extends Component {
 
   componentWillMount() {
     console.log("Get restaurant");
+    //this.props.getRestaurantDetailsHome();
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .get(
         `${serverAddress}/yelp/profile/restaurant/${localStorage.getItem(
@@ -42,6 +56,10 @@ class RestaurantHome extends Component {
   }
 
   getAllCategories = () => {
+    //this.props.getAllCategoriesRestaurant();
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .get(
         `${serverAddress}/yelp/menu/category/${localStorage.getItem(
@@ -65,6 +83,10 @@ class RestaurantHome extends Component {
   };
 
   getAllMenuItems = () => {
+    //this.props.getMenuItemsRestaurant();
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     return axios
       .get(
         `${serverAddress}/yelp/menu/items/${localStorage.getItem(
@@ -89,7 +111,11 @@ class RestaurantHome extends Component {
 
   ItemsForCategory = (menu_category) => {
     console.log("filter item for:");
+
+    console.log("menu_category");
     console.log(menu_category);
+
+    console.log("this.state.menu_items");
     console.log(this.state.menu_items);
     var itemsSection = [];
 
@@ -100,7 +126,8 @@ class RestaurantHome extends Component {
       this.state.menu_items.length > 0
     ) {
       var filteredItems = this.state.menu_items.filter(
-        (_item) => _item.category_id === menu_category.category_id
+        //(_item) => _item.category_id === menu_category.category_id
+        (_item) => _item.item_category === menu_category._id
       );
       //console.log(filteredItems);
       if (filteredItems.length > 0) {
@@ -206,5 +233,23 @@ class RestaurantHome extends Component {
     );
   }
 }
+
+/*RestaurantHome.propTypes = {
+  getAllCategoriesRestaurant: PropTypes.func.isRequired,
+  //searchRestaurantsHome: PropTypes.func.isRequired,
+  customer: PropTypes.object.isRequired,
+  restaurant: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  customer: state.restaurantHome.customer,
+  restaurant: state.restaurantHome.restaurant,
+});
+
+export default connect(mapStateToProps, {
+  getAllCategoriesRestaurant,
+  //searchRestaurantsHome,
+})(RestaurantHome);*/
+
 //export Home Component
 export default RestaurantHome;

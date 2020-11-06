@@ -32,6 +32,9 @@ class CustomerEvent extends Component {
   }
 
   getRegisteredEvents = () => {
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .get(
         `${serverAddress}/yelp/event/customer/registration/${localStorage.getItem(
@@ -59,6 +62,9 @@ class CustomerEvent extends Component {
   };
 
   componentDidMount() {
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .get(`${serverAddress}/yelp/event/all`)
       .then((response) => {
@@ -94,6 +100,9 @@ class CustomerEvent extends Component {
         this.state.search_input === ""
           ? "_"
           : this.state.search_input;
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       axios
         .get(`${serverAddress}/yelp/event/${searchInput}`)
         .then((response) => {

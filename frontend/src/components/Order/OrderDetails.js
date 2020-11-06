@@ -23,6 +23,9 @@ class OrderDetails extends Component {
         //prevPath: this.props.location.state.prevPath
       });
 
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       axios
         .get(
           `${serverAddress}/yelp/order/orderitems/${this.props.location.state.order_details.order_id}`

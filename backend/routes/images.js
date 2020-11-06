@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
 const kafka = require("../kafka/client");
+const { checkAuth } = require("../config/passport");
 
 const customerStorage = multer.diskStorage({
   destination: path.join(__dirname, "..") + "/public/uploads/customer",
@@ -25,7 +26,7 @@ const customerUpload = multer({
   limits: { fileSize: 1000000 },
 }).single("cust_image");
 
-router.post("/customer/:customer_id", (req, res) => {
+router.post("/customer/:customer_id", checkAuth, (req, res) => {
   customerUpload(req, res, function (err) {
     if (!err) {
       kafka.make_request(
@@ -93,7 +94,7 @@ const restaurantUpload = multer({
   limits: { fileSize: 1000000 },
 }).single("res_image");
 
-router.post("/restaurant/:restaurant_id", (req, res) => {
+router.post("/restaurant/:restaurant_id", checkAuth, (req, res) => {
   restaurantUpload(req, res, function (err) {
     if (!err) {
       kafka.make_request(
@@ -129,6 +130,8 @@ router.post("/restaurant/:restaurant_id", (req, res) => {
 });
 
 router.get("/restaurant/:restaurant_image", (req, res) => {
+  console.log("Get restaurant image");
+  console.log(req);
   var image =
     path.join(__dirname, "..") +
     "/public/uploads/restaurant/" +
@@ -155,7 +158,7 @@ const itemUpload = multer({
   limits: { fileSize: 1000000 },
 }).single("item_image");
 
-router.post("/item/:item_id", (req, res) => {
+router.post("/item/:item_id", checkAuth, (req, res) => {
   itemUpload(req, res, function (err) {
     if (!err) {
       kafka.make_request(
@@ -215,7 +218,7 @@ const eventUpload = multer({
   limits: { fileSize: 1000000 },
 }).single("eventimage");
 
-router.post("/event/:event_id", (req, res) => {
+router.post("/event/:event_id", checkAuth, (req, res) => {
   eventUpload(req, res, function (err) {
     if (!err) {
       if (req.params.event_id !== "undefined") {

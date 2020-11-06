@@ -84,6 +84,12 @@ const restaurantSchema = new schema(
         ref: "Event",
       },
     ],
+    order: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order",
+      },
+    ],
   },
   { versionKey: false }
 );

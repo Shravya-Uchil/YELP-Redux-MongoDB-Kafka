@@ -3,8 +3,9 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const db = require("../mysqlDB.js");
 const kafka = require("../kafka/client");
+const { checkAuth } = require("../config/passport");
 
-router.get("/customer/:email_id", (req, res) => {
+router.get("/customer/:email_id", checkAuth, (req, res) => {
   kafka.make_request(
     "customer-topic",
     { path: "customer_email", body: req.params },
@@ -25,7 +26,7 @@ router.get("/customer/:email_id", (req, res) => {
   );
 });
 
-router.get("/customerById/:cust_id", (req, res) => {
+router.get("/customerById/:cust_id", checkAuth, (req, res) => {
   kafka.make_request(
     "customer-topic",
     { path: "customer_id", body: req.params },
@@ -46,7 +47,7 @@ router.get("/customerById/:cust_id", (req, res) => {
   );
 });
 
-router.post("/customer", async (req, res) => {
+router.post("/customer", checkAuth, async (req, res) => {
   var encryptedPassword = "NULL";
   try {
     if (req.body.password && req.body.password !== "") {
@@ -94,7 +95,7 @@ router.post("/customer", async (req, res) => {
   }
 });
 
-router.get("/restaurant/:restaurant_id", (req, res) => {
+router.get("/restaurant/:restaurant_id", checkAuth, (req, res) => {
   kafka.make_request(
     "restaurant-topic",
     { path: "restaurant", body: req.params },
@@ -115,10 +116,73 @@ router.get("/restaurant/:restaurant_id", (req, res) => {
   );
 });
 
-router.post("/restaurant", async (req, res) => {
+router.post("/restaurant", checkAuth, async (req, res) => {
   kafka.make_request(
     "restaurant-topic",
     { path: "update_restaurant", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
+    }
+  );
+});
+
+router.get("/all", checkAuth, (req, res) => {
+  console.log("get all users");
+  kafka.make_request("customer-topic", { path: "all_customers" }, function (
+    err,
+    results
+  ) {
+    if (err) {
+      console.log(err);
+      res.writeHead(err.status, {
+        "Content-Type": "text/plain",
+      });
+      res.end(err.data);
+    } else {
+      res.writeHead(results.status, {
+        "Content-Type": "text/plain",
+      });
+      res.end(results.data);
+    }
+  });
+});
+
+router.post("/followCustomer", checkAuth, async (req, res) => {
+  kafka.make_request(
+    "customer-topic",
+    { path: "follow_user", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
+    }
+  );
+});
+
+router.get("/customer/search/:search_str", checkAuth, async (req, res) => {
+  kafka.make_request(
+    "customer-topic",
+    { path: "search_user", body: req.params },
     function (err, results) {
       if (err) {
         console.log(err);

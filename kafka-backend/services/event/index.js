@@ -48,7 +48,7 @@ async function getAllEvents(msg, callback) {
     let events = await Event.find();
     if (events) {
       response.status = 200;
-      events.forEach((obj) => renameKey(obj, "_id", "event_id"));
+      //events.forEach((obj) => renameKey(obj, "_id", "event_id"));
       response.data = JSON.stringify(events);
       return callback(null, response);
     } else {
@@ -95,14 +95,14 @@ async function getEventByRestaurantId(msg, callback) {
   let response = {};
   console.log("Get event by restaurant id: ", msg);
   try {
-    let restaurant = await Restaurant.findById(msg.body.res_id, {
-      event: 1,
-    });
+    let restaurant = await Restaurant.findById(msg.body.res_id);
     await restaurant
       .populate({
         path: "event",
       })
       .execPopulate();
+    //console.log("blabslas");
+    //console.log(restaurant);
     if (restaurant && restaurant.event.length > 0) {
       let events = restaurant.event;
       response.status = 200;
@@ -126,35 +126,37 @@ async function createEvent(msg, callback) {
   let err = {};
   let response = {};
   console.log("Create event: ", msg);
-  let time = req.body.event_time;
+  let time = msg.body.event_time;
   time = time + ":00";
   try {
     let event = await Event.find({
       $and: [
         { event_name: msg.body.event_name },
         { event_description: msg.body.event_description },
-        { event_time: msg.body.time },
+        { event_time: time },
         { event_date: msg.body.event_date },
         { event_location: msg.body.event_location },
         { event_hashtag: msg.body.event_hashtag },
         { restaurant_id: msg.body.restaurant_id },
       ],
     });
-    if (event) {
-      response.status = 500;
+    if (event && event.length > 0) {
+      console.log("event exists");
+      console.log(event);
+      response.status = 401;
       response.data = "EVENT_EXISTS";
       return callback(null, response);
     } else {
-      let restaurant = Restaurant.findById(msg.body.restaurant_id);
-      if (!restaurant) {
+      let restaurant = await Restaurant.findById(msg.body.restaurant_id);
+      if (restaurant) {
         let newEvent = new Event({
           event_name: msg.body.event_name,
           event_description: msg.body.event_description,
-          event_time: msg.body.time,
+          event_time: time,
           event_date: msg.body.event_date,
           event_location: msg.body.event_location,
           event_hashtag: msg.body.event_hashtag,
-          restaurant_id: msg.body.restaurant_id,
+          restaurant_id: restaurant._id,
         });
         let savedEvt = await newEvent.save();
         if (savedEvt) {
@@ -192,22 +194,23 @@ async function createEvent(msg, callback) {
 async function registerForEvent(msg, callback) {
   let err = {};
   let response = {};
-  console.log("Create event: ", msg);
+  console.log("Register for event: ", msg);
   //let sql = `CALL register_to_event('${req.body.event_id}', '${req.body.restaurant_id}', '${req.body.customer_id}');`;
   try {
-    let customer = await Customer.findById(msg.customer_id);
-    let event = await Event.find({ restaurant_id: msg.restaurant_id });
+    let customer = await Customer.findById(msg.body.customer_id);
+    let event = await Event.findById(msg.body.event_id);
     //let restaurant = await Customer.findById(msg.restaurant_id);
-
-    if (!customer || !event || event._id.toString() != msg.event_id) {
+    console.log(customer);
+    console.log(event);
+    if (!customer || !event) {
       response.status = 500;
       response.data = JSON.stringify({ status: "Error in Data" });
       return callback(null, response);
     } else {
-      if (customer.event.indexOf(event._id) != -1) {
+      if (customer.event.indexOf(event._id) == -1) {
         customer.event.push(event._id);
         let savedCust = await customer.save();
-        if (event.customer_id.indexOf(savedCust._id) != -1) {
+        if (event.customer_id.indexOf(savedCust._id) == -1) {
           event.customer_id.push(savedCust._id);
           let savedEvt = await event.save();
         }
@@ -215,7 +218,7 @@ async function registerForEvent(msg, callback) {
         response.data = "REGISTERED";
         return callback(null, response);
       } else {
-        response.status = 500;
+        response.status = 200;
         response.data = "REGISTRATION_EXISTS";
         return callback(null, response);
       }
@@ -233,16 +236,14 @@ async function getRegisteredEventForCustomer(msg, callback) {
   let response = {};
   console.log("Get registered event for customer: ", msg);
   try {
-    let restaurant = await Restaurant.findById(msg.body.res_id, {
-      event: 1,
-    });
-    await restaurant
+    let customer = await Customer.findById(msg.body.customer_id);
+    await customer
       .populate({
         path: "event",
       })
       .execPopulate();
-    if (restaurant && restaurant.event.length > 0) {
-      let events = restaurant.event;
+    if (customer && customer.event.length > 0) {
+      let events = customer.event;
       response.status = 200;
       events.forEach((obj) => renameKey(obj, "_id", "event_id"));
       response.data = JSON.stringify(events);
@@ -268,13 +269,28 @@ async function isCustomerRegistered(msg, callback) {
     let found = false;
     let customer = await Customer.findById(msg.body.customer_id);
     if (customer) {
+      console.log("customer");
+      console.log(customer);
+      let e;
       let events = customer.event;
-      for (e in events) {
-        if (e._id.toString === msg.body.event_id) {
+      console.log(events);
+      for (let i = 0; i < events.length; i++) {
+        console.log(events[i]);
+        console.log(msg.body.event_id);
+        if (events[i].toString() === msg.body.event_id) {
+          console.log("same");
           found = true;
           break;
         }
       }
+      /* for (e in events) {
+        console.log(e);
+        console.log(msg.body.event_id);
+        if (e.toString() === msg.body.event_id) {
+          found = true;
+          break;
+        }
+      }*/
     }
     if (found) {
       response.status = 200;
@@ -299,10 +315,11 @@ async function getCustomersRegisteredToEvent(msg, callback) {
   console.log("Get registered customers for event: ", msg);
   try {
     let event = await Event.findById(msg.body.event_id);
-    if (event && event.customer.length > 0) {
-      let customers = event.customer;
+    await event.populate("customer_id").execPopulate();
+    if (event && event.customer_id.length > 0) {
+      let customers = event.customer_id;
       response.status = 200;
-      customers.forEach((obj) => renameKey(obj, "_id", "customer_id"));
+      //customers.forEach((obj) => renameKey(obj, "_id", "customer_id"));
       response.data = JSON.stringify(customers);
       return callback(null, response);
     } else {

@@ -35,6 +35,14 @@ class Navbar extends Component {
           </Link>
         );
       }
+      let usersTab = null;
+      if (localStorage.getItem("customer_id")) {
+        usersTab = (
+          <Link to="/users" id="login-link">
+            Users
+          </Link>
+        );
+      }
       navLogin = (
         <ul
           className="nav navbar-nav navbar-right d-flex flex-row"
@@ -53,6 +61,8 @@ class Navbar extends Component {
           </li>
           &nbsp;&nbsp;&nbsp;&nbsp;
           <li>{ordersTab}</li>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <li>{usersTab}</li>
           &nbsp;&nbsp;&nbsp;&nbsp;
           <li>
             <Link to="/" id="login-link" onClick={this.handleLogout}>

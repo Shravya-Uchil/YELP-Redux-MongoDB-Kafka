@@ -26,6 +26,9 @@ class CustomerOrderHistory extends Component {
   }
 
   getOrderHistory = () => {
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .get(
         `${serverAddress}/yelp/order/customer/allOrders/${localStorage.getItem(

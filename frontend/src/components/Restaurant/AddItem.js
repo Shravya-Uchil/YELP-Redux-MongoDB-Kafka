@@ -48,6 +48,9 @@ class AddItem extends Component {
     }
     axios;
     if (this.props.location.state) {
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       axios
         .get(
           `${serverAddress}/yelp/menu/categoryById/${this.props.location.state.item_category}`
@@ -89,13 +92,18 @@ class AddItem extends Component {
     //var data = Object.assign({}, this.state);
     console.log("Add item");
     console.log(data);
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .post(`${serverAddress}/yelp/menu/item`, data)
       .then((response) => {
         console.log("Updated item");
         alert("Item Added!");
+        console.log(response.data);
         this.setState({
           isAddDone: 1,
+          item_id: response.data.data._id,
         });
       })
       .catch((error) => {
@@ -113,6 +121,9 @@ class AddItem extends Component {
         "content-type": "multipart/form-data",
       },
     };
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .post(
         `${serverAddress}/yelp/images/item/${this.state.item_id}`,
@@ -142,9 +153,9 @@ class AddItem extends Component {
     let redirectVar = null;
     if (!localStorage.getItem("restaurant_id")) {
       redirectVar = <Redirect to="/login" />;
-    } else if (this.state.isAddDone) {
+    } /*else if (this.state.isAddDone) {
       redirectVar = <Redirect to="/home" />;
-    }
+    }*/
 
     console.log("render");
     console.log(this.state);

@@ -4,9 +4,12 @@ import serverAddress from "../config";
 
 export const getCustomerDetailsHome = () => (dispatch) => {
   console.log("get customer for homepage");
+  axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    "token"
+  );
   axios
     .get(
-      `   ${serverAddress}/yelp/profile/customerById/${localStorage.getItem(
+      `${serverAddress}/yelp/profile/customerById/${localStorage.getItem(
         "customer_id"
       )}`
     )
@@ -24,6 +27,9 @@ export const getCustomerDetailsHome = () => (dispatch) => {
 
 export const searchRestaurantsHome = (searchStr) => (dispatch) => {
   console.log("search restaurants");
+  axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    "token"
+  );
   axios
     .get(`${serverAddress}/yelp/restaurant/search/${searchStr}`)
     .then((response) => response.data)

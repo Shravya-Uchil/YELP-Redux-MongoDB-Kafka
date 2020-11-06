@@ -172,7 +172,10 @@ async function addItem(msg, callback) {
         let savedItem = await item.save();
         if (savedItem) {
           response.status = 200;
-          response.data = JSON.stringify({ status: "ITEM_UPDATED" });
+          response.data = JSON.stringify({
+            data: savedItem,
+            status: "ITEM_UPDATED",
+          });
           return callback(null, response);
         } else {
           response.status = 500;
@@ -200,7 +203,10 @@ async function addItem(msg, callback) {
         let savedRes = await restaurant.save();
         if (savedRes) {
           response.status = 200;
-          response.data = JSON.stringify({ status: "ITEM_ADDED" });
+          response.data = JSON.stringify({
+            data: savedItem,
+            status: "ITEM_ADDED",
+          });
           return callback(null, response);
         } else {
           response.status = 500;

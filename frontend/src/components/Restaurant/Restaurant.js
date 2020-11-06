@@ -48,6 +48,12 @@ class Restaurant extends Component {
       let id =
         this.props.location.state.restaurant_id ||
         this.props.location.state._id;
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       axios
         .get(
           `${serverAddress}/yelp/restaurant/hasReviewed/${localStorage.getItem(
@@ -80,6 +86,9 @@ class Restaurant extends Component {
       let id =
         this.props.location.state.restaurant_id ||
         this.props.location.state._id;
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       axios
         .get(`${serverAddress}/yelp/menu/category/${id}`)
         .then((response) => {
@@ -103,6 +112,9 @@ class Restaurant extends Component {
       let id =
         this.props.location.state.restaurant_id ||
         this.props.location.state._id;
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       return axios
         .get(`${serverAddress}/yelp/menu/items/${id}`)
         .then((response) => {
@@ -122,21 +134,25 @@ class Restaurant extends Component {
   };
 
   ItemsForCategory = (menu_category) => {
-    console.log("filter item for:");
+    //console.log("filter item for:");
+    console.log("menu_category");
     console.log(menu_category);
+    console.log("this.state.menu_items");
     console.log(this.state.menu_items);
     var itemsSection = [];
-
-    //console.log(menu_category.category_name);
+    console.log("menu_category.category_name");
+    console.log(menu_category.category_name);
     if (
       this.state &&
       this.state.menu_items &&
       this.state.menu_items.length > 0
     ) {
       var filteredItems = this.state.menu_items.filter(
-        (_item) => _item.category_id === menu_category.category_id
+        // (_item) => _item.category_id === menu_category.category_id
+        (_item) => _item.item_category === menu_category._id
       );
-      //console.log(filteredItems);
+      console.log("filteredItems");
+      console.log(filteredItems);
       if (filteredItems.length > 0) {
         var tag = <h4>{menu_category.category_name}</h4>;
         itemsSection.push(tag);
@@ -172,6 +188,9 @@ class Restaurant extends Component {
         };
         console.log("placing order");
         console.log(data);
+        axios.defaults.headers.common["authorization"] = localStorage.getItem(
+          "token"
+        );
         axios
           .post(`${serverAddress}/yelp/order/customer/placeorder`, data)
           .then((response) => {
@@ -218,6 +237,9 @@ class Restaurant extends Component {
     //var data = Object.assign({}, this.state);
     console.log("Add review");
     console.log(data);
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .post(`${serverAddress}/yelp/restaurant/restaurantReview`, data)
       .then((response) => {

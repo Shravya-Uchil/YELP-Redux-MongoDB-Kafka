@@ -20,6 +20,9 @@ class RestaurantReview extends Component {
     } else {
       res_id = this.props.location.state._id;
     }
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .get(`${serverAddress}/yelp/restaurant/restaurantReview/${res_id}`)
       .then((response) => {

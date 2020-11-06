@@ -33,6 +33,9 @@ class RestaurantOrders extends Component {
   }
 
   getOrderHistory = () => {
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .get(
         `${serverAddress}/yelp/order/restaurant/allOrders/${localStorage.getItem(
@@ -89,6 +92,9 @@ class RestaurantOrders extends Component {
         order_id: this.state.order_delivery_status_id,
         order_delivery_status: this.state.order_delivery_status,
       };
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       axios
         .post(
           `${serverAddress}/yelp/order/restaurant/updateDeliveryStatus`,
@@ -129,6 +135,9 @@ class RestaurantOrders extends Component {
         order_id: this.state.order_status_id,
         order_status: this.state.order_status,
       };
+      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        "token"
+      );
       axios
         .post(`${serverAddress}/yelp/order/restaurant/updateOrderStatus`, data)
         .then((response) => {

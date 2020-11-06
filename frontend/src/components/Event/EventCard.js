@@ -25,6 +25,9 @@ class EventDetails extends Component {
     });
   }
   componentDidMount() {
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .get(
         `${serverAddress}/yelp/event/restaurant/${localStorage.getItem(

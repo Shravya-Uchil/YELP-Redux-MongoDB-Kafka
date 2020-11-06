@@ -76,6 +76,9 @@ class CustomerProfile extends Component {
         "content-type": "multipart/form-data",
       },
     };
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .post(
         `${serverAddress}/yelp/images/customer/${this.state.customer_id}`,

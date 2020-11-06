@@ -54,6 +54,9 @@ class AddEvent extends Component {
     //var data = Object.assign({}, this.state);
     console.log("Add event");
     console.log(data);
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .post(`${serverAddress}/yelp/event/event`, data)
       .then((response) => {
@@ -78,6 +81,9 @@ class AddEvent extends Component {
         "content-type": "multipart/form-data",
       },
     };
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .post(
         `${serverAddress}/yelp/images/event/${this.state.event_id}`,

@@ -49,9 +49,21 @@ async function searchRestaurant(msg, callback) {
           { restaurant_name: new RegExp(msg.body.search_str, "gi") },
           { description: new RegExp(msg.body.search_str, "gi") },
           { cuisine: new RegExp(msg.body.search_str, "gi") },
+          {
+            "menu_category.category_name": new RegExp(
+              msg.body.search_str,
+              "gi"
+            ),
+          },
+          { "menu_item.item_name": new RegExp(msg.body.search_str, "gi") },
+          {
+            "menu_item.item_description": new RegExp(msg.body.search_str, "gi"),
+          },
         ],
       });
-      await restaurant
+      console.log("restaurant!!");
+      console.log(restaurant);
+      /*await restaurant
         .populate({
           path: "menu_category",
           match: { category_name: new RegExp(msg.body.search_str, "gi") },
@@ -68,7 +80,7 @@ async function searchRestaurant(msg, callback) {
           select:
             "item_name item_price item_description item_category item_image item_ingredients _id",
         })
-        .execPopulate();
+        .execPopulate();*/
     } else {
       console.log("Find all restaurants");
       restaurant = await Restaurant.find();

@@ -21,6 +21,7 @@ import AddItem from "./Restaurant/AddItem";
 import CustomerOrderHistory from "./Order/CustomerOrderHistory";
 import OrderDetails from "./Order/OrderDetails";
 import RestaurantOrders from "./Order/RestaurantOrders";
+import Users from "./Customer/Users";
 //Create a Main Component
 class Main extends Component {
   render() {
@@ -48,6 +49,7 @@ class Main extends Component {
         <Route path="/customerorderhistory" component={CustomerOrderHistory} />
         <Route path="/ordercard" component={OrderDetails} />
         <Route path="/restaurantorders" component={RestaurantOrders} />
+        <Route path="/users" component={Users} />
       </div>
     );
   }

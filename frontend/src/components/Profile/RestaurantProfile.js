@@ -24,6 +24,9 @@ class RestaurantProfile extends Component {
   }
 
   componentWillMount() {
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .get(
         `${serverAddress}/yelp/profile/restaurant/${localStorage.getItem(
@@ -66,6 +69,9 @@ class RestaurantProfile extends Component {
         "content-type": "multipart/form-data",
       },
     };
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .post(
         `${serverAddress}/yelp/images/restaurant/${this.state.restaurant_id}`,
@@ -133,6 +139,9 @@ class RestaurantProfile extends Component {
     }
     console.log("data");
     console.log(data);
+    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      "token"
+    );
     axios
       .post(`${serverAddress}/yelp/profile/restaurant`, data)
       .then((response) => {

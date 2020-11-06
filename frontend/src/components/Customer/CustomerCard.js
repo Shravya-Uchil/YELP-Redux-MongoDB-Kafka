@@ -2,23 +2,37 @@ import React, { Component } from "react";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import axios from "axios";
-import { Col, Row } from "react-bootstrap";
+import { Col, Row, Button } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import NavBar from "../LandingPage/Navbar.js";
 import serverAddress from "../../config";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { getCustomerCard } from "../../actions/customerProfileActions";
+import {
+  getCustomerCard,
+  followCustomer,
+} from "../../actions/customerProfileActions";
 
 class CustomerCard extends Component {
   constructor(props) {
     super(props);
     // redux change
     this.state = {};
+    this.setState({
+      disable: false,
+      buttonName: "Follow",
+    });
+    this.enableButton = this.enableButton.bind(this);
+    this.onClick = this.onClick.bind(this);
   }
 
   componentDidMount() {
-    this.props.getCustomerCard(this.props.location.state.customer_id);
+    this.enableButton();
+    this.setState({
+      disable: false,
+      buttonName: "Follow",
+    });
+    this.props.getCustomerCard(this.props.location.state._id);
     /*axios
       .get(
         `${serverAddress}/yelp/profile/customerById/${this.props.location.state.customer_id}`
@@ -43,7 +57,13 @@ class CustomerCard extends Component {
     if (nextProps.customer) {
       var { customer } = nextProps;
 
-      /* var customerData = {
+      if (customer.result == "CUSTOMER_FOLLOWED") {
+        this.setState({
+          disable: true,
+          buttonName: "Following",
+        });
+      } else {
+        /* var customerData = {
         cust_name: customer.cust_name || this.state.cust_name,
         email_id: customer.email_id || this.state.email_id,
         city: customer.city || this.state.city,
@@ -60,11 +80,29 @@ class CustomerCard extends Component {
         blog_website: customer.blog_website || this.state.blog_website,
         customer_id: customer.customer_id || this.state.customer_id,
       };*/
+        this.setState({
+          customer: customer,
+        });
+        console.log("customer data");
+      }
+    }
+  }
+
+  onClick = (e) => {
+    //prevent page from refresh
+    e.preventDefault();
+    let data = {
+      current_cust_id: localStorage.getItem("customer_id"),
+      target_cust_id: this.props.location.state._id,
+    };
+    this.props.followCustomer(data);
+  };
+
+  enableButton() {
+    if (localStorage.getItem("customer_id") != this.props.location.state._id) {
       this.setState({
-        customer: customer,
+        disable: false,
       });
-      console.log("customer data");
-      console.log(this.state.customer);
     }
   }
 
@@ -77,10 +115,23 @@ class CustomerCard extends Component {
       redirectVar = <Redirect to="/login" />;
     }
 
+    let disable = this.state.disable;
+    let buttonName = this.state.buttonName;
     if (this.state && this.state.customer) {
       var imgSrc = `${serverAddress}/yelp/images/customer/${this.state.customer.cust_image}`;
-    }
-    if (this.state && this.state.customer) {
+      console.log("Check if already following");
+      console.log(this.state.customer);
+      if (this.state.customer.followers.length > 0) {
+        let idx = this.state.customer.followers.indexOf(
+          localStorage.getItem("customer_id")
+        );
+        console.log(idx);
+        if (idx != -1) {
+          disable = true;
+          buttonName = "Following";
+        }
+      }
+
       customerTag = (
         <Row>
           <Col sm={2}>
@@ -112,6 +163,13 @@ class CustomerCard extends Component {
                   Phone no: {this.state.customer.phone_number || ""}
                 </Card.Text>
                 <Card.Text>Bio: {this.state.customer.headline || ""}</Card.Text>
+                <Button
+                  variant="primary"
+                  onClick={this.onClick}
+                  disabled={disable}
+                >
+                  {buttonName} {this.state.customer.cust_name}
+                </Button>
               </Card.Body>
             </Card>
           </Col>
@@ -132,6 +190,7 @@ class CustomerCard extends Component {
 CustomerCard.propTypes = {
   getCustomerCard: PropTypes.func.isRequired,
   customer: PropTypes.object.isRequired,
+  followCustomer: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -140,4 +199,5 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
   getCustomerCard,
+  followCustomer,
 })(CustomerCard);

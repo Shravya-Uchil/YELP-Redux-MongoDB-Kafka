@@ -1,9 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../mysqlDB.js");
+const kafka = require("../kafka/client");
+const { checkAuth } = require("../config/passport");
 
-router.post("/customer/placeorder", (req, res) => {
-  let sql = `CALL add_order('${req.body.customer_id}', '${req.body.restaurant_id}', '${req.body.order_status}','${req.body.order_cost}', '${req.body.order_type}', '${req.body.order_delivery_status}');`;
+router.post("/customer/placeorder", checkAuth, (req, res) => {
+  console.log("place order");
+  kafka.make_request(
+    "order-topic",
+    { path: "place_order", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
+    }
+  );
+  /*let sql = `CALL add_order('${req.body.customer_id}', '${req.body.restaurant_id}', '${req.body.order_status}','${req.body.order_cost}', '${req.body.order_type}', '${req.body.order_delivery_status}');`;
   db.query(sql, (err, result) => {
     if (err) {
       res.writeHead(500, {
@@ -33,123 +54,117 @@ router.post("/customer/placeorder", (req, res) => {
       });
       res.end(result[0][0]);
     }
-  });
+  });*/
 });
 
-router.get("/customer/allOrders/:customer_id", (req, res) => {
-  let sql = `CALL get_orders_customer('${req.params.customer_id}');`;
-  db.query(sql, (err, result) => {
-    if (err) {
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("Database Error");
+router.get("/customer/allOrders/:customer_id", checkAuth, (req, res) => {
+  console.log("Get all orders for customer id");
+  kafka.make_request(
+    "order-topic",
+    { path: "all_orders_by_customer_id", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
     }
-    if (result && result.length > 0 && result[0][0].status == "NO_RECORDS") {
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("NO_RECORDS");
-    } else {
-      res.writeHead(200, {
-        "Content-Type": "text/plain",
-      });
-      res.end(JSON.stringify(result[0]));
-    }
-  });
+  );
 });
 
-router.get("/restaurant/allOrders/:restaurant_id", (req, res) => {
-  let sql = `CALL get_orders_restaurant('${req.params.restaurant_id}');`;
-  db.query(sql, (err, result) => {
-    if (err) {
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("Database Error");
+router.get("/restaurant/allOrders/:restaurant_id", checkAuth, (req, res) => {
+  console.log("Get all orders for restaurant id");
+  kafka.make_request(
+    "order-topic",
+    { path: "all_orders_by_restaurant_id", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
     }
-    if (result && result.length > 0 && result[0][0].status == "NO_RECORDS") {
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("NO_RECORDS");
-    } else {
-      res.writeHead(200, {
-        "Content-Type": "text/plain",
-      });
-      res.end(JSON.stringify(result[0]));
-    }
-  });
+  );
 });
 
-router.get("/orderitems/:order_id", (req, res) => {
-  let sql = `CALL get_orders_items('${req.params.order_id}');`;
-  db.query(sql, (err, result) => {
-    if (err) {
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("Database Error");
+router.get("/orderitems/:order_id", checkAuth, (req, res) => {
+  console.log("Get order items");
+  kafka.make_request(
+    "order-topic",
+    { path: "order_items_by_order_id", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
     }
-    if (result && result.length > 0 && result[0][0].status == "NO_RECORDS") {
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("NO_RECORDS");
-    } else {
-      res.writeHead(200, {
-        "Content-Type": "text/plain",
-      });
-      res.end(JSON.stringify(result[0]));
-    }
-  });
+  );
 });
 
-router.post("/restaurant/updateOrderStatus", (req, res) => {
-  let sql = `CALL update_order_status('${req.body.order_id}', '${req.body.order_status}');`;
-  db.query(sql, (err, result) => {
-    if (err) {
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("Database Error");
+router.post("/restaurant/updateOrderStatus", checkAuth, (req, res) => {
+  console.log("Update order status");
+  kafka.make_request(
+    "order-topic",
+    { path: "update_order_status", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
     }
-    if (result && result.length > 0 && result[0][0].status == "NO_RECORDS") {
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("NO_RECORDS");
-    } else {
-      res.writeHead(200, {
-        "Content-Type": "text/plain",
-      });
-      res.end(JSON.stringify(result[0]));
-    }
-  });
+  );
 });
 
-router.post("/restaurant/updateDeliveryStatus", (req, res) => {
-  let sql = `CALL update_delivery_status('${req.body.order_id}', '${req.body.order_delivery_status}');`;
-  db.query(sql, (err, result) => {
-    if (err) {
-      console.log(err);
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("Database Error");
+router.post("/restaurant/updateDeliveryStatus", checkAuth, (req, res) => {
+  console.log("Update delivery status");
+  kafka.make_request(
+    "order-topic",
+    { path: "update_delivery_status", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
     }
-    if (result && result.length > 0 && result[0][0].status == "NO_RECORDS") {
-      res.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
-      res.end("NO_RECORDS");
-    } else {
-      res.writeHead(200, {
-        "Content-Type": "text/plain",
-      });
-      res.end(JSON.stringify(result[0]));
-    }
-  });
+  );
 });
 
 module.exports = router;

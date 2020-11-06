@@ -86,6 +86,24 @@ const customerSchema = new schema(
         ref: "Event",
       },
     ],
+    order: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order",
+      },
+    ],
+    followers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Customer",
+      },
+    ],
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Customer",
+      },
+    ],
   },
   { versionKey: false }
 );

@@ -5,6 +5,9 @@ import serverAddress from "../config";
 export const customerSignup = (customerData) => (dispatch) => {
   console.log("signup action");
   axios.defaults.withCredentials = true;
+  axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    "token"
+  );
   axios
     .post(`${serverAddress}/yelp/signup/customer`, customerData)
     .then((response) => {
@@ -27,6 +30,9 @@ export const customerSignup = (customerData) => (dispatch) => {
 export const restaurantSignup = (restaurantData) => (dispatch) => {
   console.log("signup action");
   axios.defaults.withCredentials = true;
+  axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    "token"
+  );
   axios
     .post(`${serverAddress}/yelp/signup/restaurant`, restaurantData)
     .then((response) => {

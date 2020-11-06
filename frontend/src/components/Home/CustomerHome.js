@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
-import axios from "axios";
 import {
   InputGroup,
   FormControl,
@@ -12,7 +11,6 @@ import {
   Col,
   Row,
 } from "react-bootstrap";
-import FontAwesomeIcon from "react-fontawesome";
 import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import Map from "../Map/Map";
@@ -65,7 +63,7 @@ class CustomerHome extends Component {
       if (nextProps.customer.city != "") {
         addr = nextProps.customer.city;
       }
-      Geocode.fromAddress(addr).then(
+      Geocode.fromAddress().then(
         (resp) => {
           console.log("Locations");
           console.log(resp.results[0].geometry);
@@ -245,7 +243,6 @@ class CustomerHome extends Component {
 
   onSearch = (e) => {
     e.preventDefault();
-    axios.defaults.withCredentials = true;
     if (this.state) {
       var searchInput =
         typeof this.state.search_input === "undefined" ||
