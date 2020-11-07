@@ -64,7 +64,7 @@ class Restaurant extends Component {
           console.log("response");
           console.log(response.data);
           if (response.data) {
-            if (response.data[0].result === "REVIEWED") {
+            if (response.data.result === "REVIEWED") {
               this.setState({
                 hasReviewed: 1,
               });

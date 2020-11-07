@@ -4,6 +4,8 @@ import {
   UPDATE_CUSTOMER,
   CUSTOMER_CARD,
   FOLLOW_CUSTOMER,
+  GET_ALL_CUSTOMER,
+  SEARCH_CUSTOMER,
 } from "../actionTypes";
 import serverAddress from "../config";
 
@@ -18,7 +20,7 @@ export const getCustomerDetails = () => (dispatch) => {
         "email_id"
       )}`
     )
-    .then((response) => response.data[0])
+    .then((response) => response.data)
     .then((customer) =>
       dispatch({
         type: GET_CUSTOMER,
@@ -89,6 +91,44 @@ export const followCustomer = (customerData) => (dispatch) => {
         payload: data,
       });
     })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+export const getAllCustomers = () => (dispatch) => {
+  console.log("get all customers");
+  axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    "token"
+  );
+  axios
+    .get(`${serverAddress}/yelp/profile/all`)
+    .then((response) => response.data)
+    .then((allCustomers) =>
+      dispatch({
+        type: GET_ALL_CUSTOMER,
+        payload: allCustomers,
+      })
+    )
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+export const searchForCustomers = (searchInput) => (dispatch) => {
+  console.log("search customers");
+  axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    "token"
+  );
+  axios
+    .get(`${serverAddress}/yelp/profile/customer/search/${searchInput}`)
+    .then((response) => response.data)
+    .then((searchCustomers) =>
+      dispatch({
+        type: SEARCH_CUSTOMER,
+        payload: searchCustomers,
+      })
+    )
     .catch((error) => {
       console.log(error);
     });

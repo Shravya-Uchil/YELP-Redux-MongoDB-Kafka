@@ -139,7 +139,7 @@ async function getRestaurantById(msg, callback) {
 async function updateRestaurant(msg, callback) {
   let err = {};
   let response = {};
-  console.log("Get restaurant by id: ", msg);
+  console.log("Update restaurant: ", msg);
   try {
     let restaurantObj = await Restaurant.findById(msg.body.restaurant_id);
 
@@ -147,7 +147,7 @@ async function updateRestaurant(msg, callback) {
       restaurantObj.restaurant_name =
         restaurantObj.restaurant_name || msg.body.restaurant_name;
       restaurantObj.zip_code = restaurantObj.zip_code || msg.body.zip_code;
-      restaurantObj.contact = msg.body.contact;
+      restaurantObj.phone_number = msg.body.phone_number;
       restaurantObj.description = msg.body.description;
       restaurantObj.cuisine = msg.body.cuisine;
       restaurantObj.curbside_pickup = msg.body.curbside_pickup;
@@ -191,9 +191,25 @@ async function getRestaurantReviewById(msg, callback) {
       let review = await Review.find({
         restaurant_id: restaurant._id,
       });
+      let i = 0;
+      for (i = 0; i < review.length; i++) {
+        await review[i]
+          .populate("customer_id")
+          .populate("restaurant_id")
+          .execPopulate();
+      }
       if (review) {
+        console.log(review);
         response.status = 200;
-        review.forEach((obj) => renameKey(obj, "_id", "review_id"));
+        //review.forEach((obj) => renameKey(obj, "_id", "review_id"));
+        /*let data = {
+          _id: review._id,
+          review_text: review.review_text,
+          review_date: review.review_date,
+          review_rating: review.review_rating,
+          cust_name: cust.cust_name,
+          restaurant_name: restaurant.restaurant_name,
+        };*/
         response.data = JSON.stringify(review);
         return callback(null, response);
       } else {
@@ -220,8 +236,8 @@ async function addRestaurantReview(msg, callback) {
   console.log("Add restaurant review: ", msg);
   try {
     //let sql = `CALL add_review('${req.body.review_text}', '${req.body.review_rating}', '${req.body.restaurant_id}' ,'${req.body.customer_id}');`;
-    let restaurant = await Restaurant.findById(msg.restaurant_id);
-    let customer = await Customer.findById(msg.customer_id);
+    let restaurant = await Restaurant.findById(msg.body.restaurant_id);
+    let customer = await Customer.findById(msg.body.customer_id);
     if (!restaurant || !customer) {
       response.status = 500;
       response.data = "No restaurant or customer found";
@@ -237,7 +253,7 @@ async function addRestaurantReview(msg, callback) {
       if (!reviewExists) {
         let review = new Review({
           review_text: msg.body.review_text,
-          review_date: msg.body.review_date,
+          review_date: new Date(Date.now()),
           review_rating: msg.body.review_rating,
           customer_id: customer._id,
           restaurant_id: restaurant._id,
@@ -254,7 +270,7 @@ async function addRestaurantReview(msg, callback) {
         }
       } else {
         response.status = 200;
-        response.data = "RESTAURANT_EXISTS";
+        response.data = "REVIEW_EXISTS";
         return callback(null, response);
       }
     }
@@ -280,8 +296,8 @@ async function hasReviewed(msg, callback) {
 
     if (review) {
       response.status = 200;
-      renameKey(review, "_id", "review_id");
-      response.data = JSON.stringify(review);
+      //renameKey(review, "_id", "review_id");
+      response.data = JSON.stringify({ result: "REVIEWED" });
       return callback(null, response);
     } else {
       response.status = 200;

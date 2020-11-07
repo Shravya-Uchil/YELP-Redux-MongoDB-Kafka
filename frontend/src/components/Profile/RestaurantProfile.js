@@ -35,21 +35,21 @@ class RestaurantProfile extends Component {
       )
       .then((response) => {
         var resData = {
-          restaurant_id: response.data[0].restaurant_id,
+          restaurant_id: response.data._id,
           restaurant_name:
-            response.data[0].restaurant_name || this.state.restaurant_name,
-          email_id: response.data[0].email_id || this.state.email_id,
-          contact: response.data[0].contact || this.state.contact,
-          description: response.data[0].description || this.state.description,
-          zip_code: response.data[0].zip_code || this.state.zip_code,
+            response.data.restaurant_name || this.state.restaurant_name,
+          email_id: response.data.email_id || this.state.email_id,
+          phone_number: response.data.phone_number || this.state.phone_number,
+          description: response.data.description || this.state.description,
+          zip_code: response.data.zip_code || this.state.zip_code,
           curbside_pickup:
-            response.data[0].curbside_pickup || this.state.curbside_pickup,
-          dine_in: response.data[0].dine_in || this.state.dine_in,
+            response.data.curbside_pickup || this.state.curbside_pickup,
+          dine_in: response.data.dine_in || this.state.dine_in,
           yelp_delivery:
-            response.data[0].yelp_delivery || this.state.yelp_delivery,
-          cuisine: response.data[0].cuisine || this.state.cuisine,
+            response.data.yelp_delivery || this.state.yelp_delivery,
+          cuisine: response.data.cuisine || this.state.cuisine,
           restaurant_image:
-            response.data[0].restaurant_image || this.state.restaurant_image,
+            response.data.restaurant_image || this.state.restaurant_image,
         };
         this.setState(resData);
         console.log("State:", this.state);
@@ -262,13 +262,13 @@ class RestaurantProfile extends Component {
                   </Form.Group>
                 </Form.Row>
                 <Form.Row>
-                  <Form.Group as={Col} controlId="contact">
+                  <Form.Group as={Col} controlId="phone_number">
                     <Form.Label>Contact Info</Form.Label>
                     <Form.Control
                       type="text"
-                      name="contact"
+                      name="phone_number"
                       onChange={this.onChange}
-                      value={this.state.contact}
+                      value={this.state.phone_number}
                       required={true}
                     />
                   </Form.Group>

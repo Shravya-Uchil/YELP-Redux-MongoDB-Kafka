@@ -72,11 +72,14 @@ class RestaurantOrders extends Component {
   };
 
   changeStateValue = (e, id) => {
+    console.log("state");
+    console.log(e.target);
     this.setState({
       stateValue: e.target.text,
       order_status: e.target.text,
       order_status_id: id,
     });
+    console.log(this.state);
   };
 
   onUpdateDelivery = (e) => {
@@ -86,7 +89,7 @@ class RestaurantOrders extends Component {
     if (
       this.state &&
       this.state.order_delivery_status &&
-      this.state.order_delivery_status_id === parseInt(e.target.id)
+      this.state.order_delivery_status_id === e.target.id
     ) {
       var data = {
         order_id: this.state.order_delivery_status_id,
@@ -129,7 +132,7 @@ class RestaurantOrders extends Component {
     if (
       this.state &&
       this.state.order_status &&
-      this.state.order_status_id === parseInt(e.target.id)
+      this.state.order_status_id === e.target.id
     ) {
       var data = {
         order_id: this.state.order_status_id,
@@ -274,7 +277,7 @@ class RestaurantOrders extends Component {
                       <Link
                         to={{
                           pathname: "/customercard",
-                          state: order,
+                          state: { _id: order.customer_id },
                         }}
                       >
                         {" "}

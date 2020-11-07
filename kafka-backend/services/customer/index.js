@@ -23,6 +23,9 @@ let handle_request = async (msg, callback) => {
     case "search_user":
       searchCustomer(msg, callback);
       break;
+    case "update_customer":
+      updateCustomer(msg, callback);
+      break;
     default:
       callback(null, { status: 500, data: "no path found" });
   }
@@ -159,13 +162,18 @@ async function searchCustomer(msg, callback) {
   let response = {};
   console.log("Search for a users: ", msg);
   try {
-    let users = await Customer.find({
-      $or: [
-        { cust_name: new RegExp(msg.body.search_str, "gi") },
-        { nick_name: new RegExp(msg.body.search_str, "gi") },
-      ],
-    });
-    if (users) {
+    let users;
+    if (msg.body.search_str === "_") {
+      users = await Customer.find();
+    } else {
+      users = await Customer.find({
+        $or: [
+          { cust_name: new RegExp(msg.body.search_str, "gi") },
+          { nick_name: new RegExp(msg.body.search_str, "gi") },
+        ],
+      });
+    }
+    if (users && users.length > 0) {
       response.status = 200;
       //events.forEach((obj) => renameKey(obj, "_id", "event_id"));
       response.data = JSON.stringify(users);
@@ -176,6 +184,54 @@ async function searchCustomer(msg, callback) {
       return callback(null, response);
     }
   } catch (error) {
+    console.log(error);
+    err.status = 500;
+    err.data = "Error in Data";
+    return callback(err, null);
+  }
+}
+
+async function updateCustomer(msg, callback) {
+  let err = {};
+  let response = {};
+  console.log("Update customer: ", msg);
+  try {
+    let customerObj = await Customer.findOne({ email_id: msg.body.email_id });
+    if (customerObj) {
+      customerObj.cust_name = customerObj.cust_name || msg.body.cust_name;
+      customerObj.city = msg.body.city;
+      customerObj.state = msg.body.state;
+      customerObj.country = msg.body.country;
+      customerObj.nick_name = msg.body.nick_name;
+      customerObj.headline = msg.body.headline;
+      customerObj.yelp_since = msg.body.yelp_since;
+      customerObj.dob = msg.body.dob;
+      customerObj.things_love = msg.body.things_love;
+      customerObj.find_me = msg.body.find_me;
+      customerObj.blog_website = msg.body.blog_website;
+      customerObj.phone_number = msg.body.phone_number;
+
+      if (msg.body.password && msg.body.password !== "") {
+        customerObj.password = await bcrypt.hash(msg.body.password, 12);
+      }
+      const updatedCustomer = await customerObj.save();
+      if (updatedCustomer) {
+        response.status = 200;
+        response.data = "CUSTOMER_UPDATED";
+        return callback(null, response);
+      } else {
+        response.status = 500;
+        response.data = "Error in saving data";
+        return callback(null, response);
+      }
+    } else {
+      console.log(error);
+      response.status = 401;
+      response.data = "NO_RECORD";
+      return callback(null, response);
+    }
+  } catch (error) {
+    console.log("catch error");
     console.log(error);
     err.status = 500;
     err.data = "Error in Data";

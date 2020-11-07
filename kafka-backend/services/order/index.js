@@ -39,21 +39,33 @@ async function getOrderByCustomerId(msg, callback) {
   try {
     let customers = await Customer.findById(msg.body.customer_id);
     if (customers) {
-      await customers.populate("order").execPopulate();
-      await customers.order.populate("restaurant_id").execPopulate();
+      await customers
+        .populate({ path: "order", options: { sort: { order_date: -1 } } })
+        .execPopulate();
+      //await customers.order.populate("restaurant_id").execPopulate();
       response.status = 200;
+      console.log("customers");
+      console.log(customers);
       let data = [];
-      for (let i = 0; i < customers.order; i++) {
+      for (let i = 0; i < customers.order.length; i++) {
+        let restaurant = await Restaurant.findById(
+          customers.order[i].restaurant_id
+        );
+        if (!restaurant) {
+          response.status = 500;
+          response.data = "Data error";
+          return callback(null, response);
+        }
         let schema = {
           order_id: customers.order[i]._id,
-          restaurant_id: customers.order[i].restaurant_id._id,
+          restaurant_id: customers.order[i].restaurant_id,
           order_status: customers.order[i].order_status,
-          order_data: customers.order[i].order_date,
+          order_date: customers.order[i].order_date,
           order_cost: customers.order[i].order_cost,
           order_delivery_status: customers.order[i].order_delivery_status,
           order_type: customers.order[i].order_type,
-          restaurant_name: customers.order[i].restaurant_id.restaurant_name,
-          zip_code: customers.order[i].restaurant_id.zip_code,
+          restaurant_name: restaurant.restaurant_name,
+          zip_code: restaurant.zip_code,
           customer_id: customers._id,
           cust_name: customers.cust_name,
           phone_number: customers.phone_number,
@@ -83,25 +95,33 @@ async function getOrderByRestaurantId(msg, callback) {
   try {
     let restaurants = await Restaurant.findById(msg.body.restaurant_id);
     if (restaurants) {
-      await restaurants.populate("order").execPopulate();
-      await restaurants.order.populate("customer_id").execPopulate();
+      await restaurants
+        .populate({ path: "order", options: { sort: { order_date: -1 } } })
+        .execPopulate();
+      //await restaurants.order.populate("customer_id").execPopulate();
       let data = [];
-      for (let i = 0; i < restaurants.order; i++) {
+      for (let i = 0; i < restaurants.order.length; i++) {
+        let cust = await Customer.findById(restaurants.order[i].customer_id);
+        if (!cust) {
+          response.status = 500;
+          response.data = "Data error";
+          return callback(null, response);
+        }
         let schema = {
           order_id: restaurants.order[i]._id,
           restaurant_id: restaurants._id,
           order_status: restaurants.order[i].order_status,
-          order_data: restaurants.order[i].order_date,
+          order_date: restaurants.order[i].order_date,
           order_cost: restaurants.order[i].order_cost,
           order_delivery_status: restaurants.order[i].order_delivery_status,
           order_type: restaurants.order[i].order_type,
           restaurant_name: restaurants.restaurant_name,
           restaurant_image: restaurants.restaurant_image,
           zip_code: restaurants.zip_code,
-          customer_id: restaurants.order[i].customer_id._id,
-          cust_name: restaurants.order[i].customer_id.cust_name,
-          phone_number: restaurants.order[i].customer_id.phone_number,
-          city: restaurants.order[i].customer_id.city,
+          customer_id: cust._id,
+          cust_name: cust.cust_name,
+          phone_number: cust.phone_number,
+          city: cust.city,
         };
         data.push(schema);
       }
@@ -128,9 +148,24 @@ async function getOrderItems(msg, callback) {
   try {
     let order = await Order.findById(msg.body.order_id);
     if (order) {
-      await order.order_item.populate("item_id").execPopulate();
+      let i = 0;
+      let data = [];
+      for (i = 0; i < order.order_item.length; i++) {
+        let item = await MenuItem.findById(order.order_item[i].item_id);
+        if (!item) {
+          response.status = 500;
+          response.data = "Data error";
+          return callback(null, response);
+        }
+        let val = {
+          item_name: item.item_name,
+          item_quantity: order.order_item[i].item_quantity,
+        };
+        data.push(val);
+      }
+
       response.status = 200;
-      response.data = JSON.stringify(order);
+      response.data = JSON.stringify(data);
       return callback(null, response);
     } else {
       response.status = 500;
@@ -229,18 +264,26 @@ async function placeOrder(msg, callback) {
         order_delivery_status: msg.body.order_delivery_status,
         customer_id: cust._id,
         restaurant_id: res._id,
+        order_date: new Date(Date.now()),
+        order_item: [],
       });
-      msg.body.cart_items.forEach(async (cart_item) => {
-        let item = await MenuItem.findById(cart_item.item_id);
+      let i = 0;
+      for (i = 0; i < msg.body.cart_items.length; i++) {
+        let item = await MenuItem.findById(msg.body.cart_items[i].item_id);
         if (!item) {
           response.status = 500;
           response.data = "Data error";
           return callback(null, response);
         } else {
-          newOrder.order_item.item_id.push(item._id);
-          newOrder.order_item.item_quantity.push(cart_item.item_quantity);
+          let data = {
+            item_id: item._id,
+            item_quantity: msg.body.cart_items[i].item_quantity,
+          };
+          newOrder.order_item.push(data);
         }
-      });
+      }
+      console.log(newOrder);
+      console.log("newOrder");
       let savedOrder = await newOrder.save();
       if (!savedOrder) {
         response.status = 500;
@@ -253,7 +296,7 @@ async function placeOrder(msg, callback) {
         let savedCust = await cust.save();
         if (savedRes && savedCust) {
           response.status = 200;
-          response.data = { status: "ORDER_PLACED" };
+          response.data = JSON.stringify({ status: "ORDER_PLACED" });
           return callback(null, response);
         } else {
           response.status = 500;

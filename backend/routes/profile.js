@@ -48,7 +48,28 @@ router.get("/customerById/:cust_id", checkAuth, (req, res) => {
 });
 
 router.post("/customer", checkAuth, async (req, res) => {
-  var encryptedPassword = "NULL";
+  console.log("Update customer profile");
+  console.log(req.body);
+  kafka.make_request(
+    "customer-topic",
+    { path: "update_customer", body: req.body },
+    function (err, results) {
+      if (err) {
+        console.log(err);
+        res.writeHead(err.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(err.data);
+      } else {
+        res.writeHead(results.status, {
+          "Content-Type": "text/plain",
+        });
+        res.end(results.data);
+      }
+    }
+  );
+
+  /*var encryptedPassword = "NULL";
   try {
     if (req.body.password && req.body.password !== "") {
       encryptedPassword =
@@ -92,7 +113,7 @@ router.post("/customer", checkAuth, async (req, res) => {
       "Content-Type": "text/plain",
     });
     res.end("Error in encrypting password!!");
-  }
+  }*/
 });
 
 router.get("/restaurant/:restaurant_id", checkAuth, (req, res) => {
@@ -180,6 +201,7 @@ router.post("/followCustomer", checkAuth, async (req, res) => {
 });
 
 router.get("/customer/search/:search_str", checkAuth, async (req, res) => {
+  console.log("search user");
   kafka.make_request(
     "customer-topic",
     { path: "search_user", body: req.params },

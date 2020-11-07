@@ -61,7 +61,7 @@ router.get("/customer/allOrders/:customer_id", checkAuth, (req, res) => {
   console.log("Get all orders for customer id");
   kafka.make_request(
     "order-topic",
-    { path: "all_orders_by_customer_id", body: req.body },
+    { path: "all_orders_by_customer_id", body: req.params },
     function (err, results) {
       if (err) {
         console.log(err);
@@ -83,7 +83,7 @@ router.get("/restaurant/allOrders/:restaurant_id", checkAuth, (req, res) => {
   console.log("Get all orders for restaurant id");
   kafka.make_request(
     "order-topic",
-    { path: "all_orders_by_restaurant_id", body: req.body },
+    { path: "all_orders_by_restaurant_id", body: req.params },
     function (err, results) {
       if (err) {
         console.log(err);
@@ -105,7 +105,7 @@ router.get("/orderitems/:order_id", checkAuth, (req, res) => {
   console.log("Get order items");
   kafka.make_request(
     "order-topic",
-    { path: "order_items_by_order_id", body: req.body },
+    { path: "order_items_by_order_id", body: req.params },
     function (err, results) {
       if (err) {
         console.log(err);

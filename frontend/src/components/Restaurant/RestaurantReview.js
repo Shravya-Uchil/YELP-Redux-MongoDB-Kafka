@@ -64,12 +64,12 @@ class RestaurantReview extends Component {
               name="review_rating"
               disabled={true}
             />
-            <Link to={{ pathname: "/customercard", state: review }}>
-              <Card.Title>{review.cust_name}</Card.Title>
+            <Link to={{ pathname: "/customercard", state: review.customer_id }}>
+              <Card.Title>{review.customer_id.cust_name}</Card.Title>
             </Link>
             <Card.Body>
               <Card.Text>
-                {review.restaurant_name} | {review.review_date}
+                {review.restaurant_id.restaurant_name} | {review.review_date}
               </Card.Text>
               <Card.Text>{review.review_text}</Card.Text>
             </Card.Body>

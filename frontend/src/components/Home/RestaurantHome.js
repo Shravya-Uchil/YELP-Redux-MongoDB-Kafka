@@ -8,9 +8,9 @@ import ItemCard from "../Restaurant/Item";
 import { Link } from "react-router-dom";
 import serverAddress from "../../config";
 import {
-  getRestaurantDetailsHome,
-  getAllCategoriesRestaurant,
-  getMenuItemsRestaurant,
+  getRestaurantById,
+  getMenuCategory,
+  getMenuItem,
 } from "../../actions/restaurantHomeActions";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
@@ -24,15 +24,14 @@ class RestaurantHome extends Component {
     this.ItemsForCategory = this.ItemsForCategory.bind(this);
     this.getAllMenuItems = this.getAllMenuItems.bind(this);
     this.getAllCategories = this.getAllCategories.bind(this);
-    this.getAllMenuItems().then((ret) => {
-      this.getAllCategories();
-    });
+    this.getAllMenuItems();
+    this.getAllCategories();
   }
 
   componentWillMount() {
     console.log("Get restaurant");
-    //this.props.getRestaurantDetailsHome();
-    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    this.props.getRestaurantById(localStorage.getItem("restaurant_id"));
+    /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
     );
     axios
@@ -52,12 +51,13 @@ class RestaurantHome extends Component {
       })
       .catch((error) => {
         console.log(error);
-      });
+      });*/
   }
 
   getAllCategories = () => {
     //this.props.getAllCategoriesRestaurant();
-    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    this.props.getMenuCategory(localStorage.getItem("restaurant_id"));
+    /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
     );
     axios
@@ -79,12 +79,13 @@ class RestaurantHome extends Component {
         if (err.response && err.response.data) {
           console.log(err.response.data);
         }
-      });
+      });*/
   };
 
   getAllMenuItems = () => {
     //this.props.getMenuItemsRestaurant();
-    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    this.props.getMenuItem(localStorage.getItem("restaurant_id"));
+    /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
     );
     return axios
@@ -106,7 +107,7 @@ class RestaurantHome extends Component {
         if (err.response && err.response.data) {
           console.log(err.response.data);
         }
-      });
+      });*/
   };
 
   ItemsForCategory = (menu_category) => {
@@ -141,6 +142,35 @@ class RestaurantHome extends Component {
       return itemsSection;
     }
   };
+
+  componentWillReceiveProps(nextProps) {
+    console.log(
+      "We in Restaurant Home props received, next prop is: ",
+      nextProps
+    );
+    if (nextProps.restaurant) {
+      console.log("Restaurant response");
+      console.log(nextProps);
+      this.setState({
+        restaurant: nextProps.restaurant,
+      });
+    } else if (nextProps.menu_item) {
+      console.log("menu item response");
+      console.log(nextProps);
+      this.setState({
+        menu_items: nextProps.menu_item,
+      });
+    } else if (nextProps.menu_category) {
+      console.log("menu item response");
+      console.log(nextProps);
+      this.setState({
+        menu_category: nextProps.menu_category,
+      });
+    } else {
+      console.log("Redux error. Props:");
+      console.log(nextProps);
+    }
+  }
 
   render() {
     let redirectVar = null;
@@ -180,7 +210,7 @@ class RestaurantHome extends Component {
               <br />
               <Card.Text>
                 <h4>
-                  {restaurant.contact} | {restaurant.zip_code}
+                  {restaurant.phone_number} | {restaurant.zip_code}
                 </h4>
               </Card.Text>
               <br />
@@ -234,22 +264,26 @@ class RestaurantHome extends Component {
   }
 }
 
-/*RestaurantHome.propTypes = {
-  getAllCategoriesRestaurant: PropTypes.func.isRequired,
-  //searchRestaurantsHome: PropTypes.func.isRequired,
-  customer: PropTypes.object.isRequired,
+RestaurantHome.propTypes = {
+  getMenuCategory: PropTypes.func.isRequired,
+  getMenuItem: PropTypes.func.isRequired,
+  getRestaurantById: PropTypes.func.isRequired,
+  menu_item: PropTypes.object.isRequired,
+  menu_category: PropTypes.object.isRequired,
   restaurant: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-  customer: state.restaurantHome.customer,
+  menu_item: state.restaurantHome.menu_item,
+  menu_category: state.restaurantHome.menu_category,
   restaurant: state.restaurantHome.restaurant,
 });
 
 export default connect(mapStateToProps, {
-  getAllCategoriesRestaurant,
-  //searchRestaurantsHome,
-})(RestaurantHome);*/
+  getMenuCategory,
+  getMenuItem,
+  getRestaurantById,
+})(RestaurantHome);
 
 //export Home Component
-export default RestaurantHome;
+//export default RestaurantHome;
