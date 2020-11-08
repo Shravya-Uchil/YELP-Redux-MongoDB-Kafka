@@ -14,6 +14,13 @@ import { Link } from "react-router-dom";
 import NavBar from "../LandingPage/Navbar.js";
 import { Redirect } from "react-router";
 import serverAddress from "../../config";
+import { connect } from "react-redux";
+import {
+  getOrders,
+  updateOrderStatus,
+  updateDeliveryStatus,
+} from "../../actions/restaurantOrderActions";
+import PropTypes from "prop-types";
 
 class RestaurantOrders extends Component {
   constructor(props) {
@@ -33,7 +40,8 @@ class RestaurantOrders extends Component {
   }
 
   getOrderHistory = () => {
-    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    this.props.getOrders();
+    /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
     );
     axios
@@ -60,7 +68,7 @@ class RestaurantOrders extends Component {
             noRecords: 1,
           });
         }
-      });
+      });*/
   };
 
   changeDeliveryStateValue = (e, id) => {
@@ -95,7 +103,8 @@ class RestaurantOrders extends Component {
         order_id: this.state.order_delivery_status_id,
         order_delivery_status: this.state.order_delivery_status,
       };
-      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      this.props.updateDeliveryStatus(data);
+      /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
         "token"
       );
       axios
@@ -119,7 +128,7 @@ class RestaurantOrders extends Component {
         })
         .catch((error) => {
           console.log(error);
-        });
+        });*/
     } else {
       alert("Please change the delivery status to update.");
     }
@@ -138,7 +147,8 @@ class RestaurantOrders extends Component {
         order_id: this.state.order_status_id,
         order_status: this.state.order_status,
       };
-      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      this.props.updateOrderStatus(data);
+      /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
         "token"
       );
       axios
@@ -157,7 +167,7 @@ class RestaurantOrders extends Component {
         })
         .catch((error) => {
           console.log(error);
-        });
+        });*/
     } else {
       alert("Please change the order status to update.");
     }
@@ -185,6 +195,50 @@ class RestaurantOrders extends Component {
       }
     }
   };
+
+  componentWillReceiveProps(nextProps) {
+    console.log(
+      "We in Restaurant Home props received, next prop is: ",
+      nextProps
+    );
+    if (nextProps.orders && nextProps.orders === "UPDATED_ORDER_STATUS") {
+      console.log("order status updated");
+      console.log(nextProps);
+      let orders = this.state.orders_history_filtered;
+      for (let i = 0; i < orders.length; i++) {
+        if (orders[i].order_id === this.state.order_status_id) {
+          orders[i].order_status = this.state.order_status;
+          break;
+        }
+      }
+      //this.forceUpdate();
+    } else if (
+      nextProps.orders &&
+      nextProps.orders === "UPDATED_DELIVERY_STATUS"
+    ) {
+      console.log("delivery status updated");
+      console.log(nextProps);
+      let orders = this.state.orders_history_filtered;
+      for (let i = 0; i < orders.length; i++) {
+        if (orders[i].order_id === this.state.order_delivery_status_id) {
+          orders[i].order_delivery_status = this.state.order_delivery_status;
+          break;
+        }
+      }
+      //this.forceUpdate();
+    } else if (nextProps.orders) {
+      if (nextProps.orders[0]) {
+        this.setState({
+          orders_history: nextProps.orders,
+          orders_history_filtered: nextProps.orders,
+          noRecords: 0,
+        });
+      }
+    } else {
+      console.log("Redux error. Props:");
+      console.log(nextProps);
+    }
+  }
 
   render() {
     let message = null;
@@ -399,4 +453,22 @@ class RestaurantOrders extends Component {
     );
   }
 }
-export default RestaurantOrders;
+
+RestaurantOrders.propTypes = {
+  getOrders: PropTypes.func.isRequired,
+  updateDeliveryStatus: PropTypes.func.isRequired,
+  updateOrderStatus: PropTypes.func.isRequired,
+  orders: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  orders: state.restaurantOrder.orders,
+});
+
+export default connect(mapStateToProps, {
+  getOrders,
+  updateDeliveryStatus,
+  updateOrderStatus,
+})(RestaurantOrders);
+
+//export default RestaurantOrders;

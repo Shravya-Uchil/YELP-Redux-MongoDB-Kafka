@@ -30,6 +30,7 @@ let handle_request = async (msg, callback) => {
             cust_name: customer.cust_name,
             email_id: customer.email_id,
             password: customer.password,
+            from: customer.cust_name,
             login_type: 0,
           };
           response.data = JSON.stringify(customerObject);
@@ -61,6 +62,7 @@ let handle_request = async (msg, callback) => {
             cust_name: restaurant.cust_name,
             email_id: restaurant.email_id,
             password: restaurant.password,
+            from: restaurant.restaurant_name,
             login_type: 1,
           };
           response.data = JSON.stringify(restaurantObject);

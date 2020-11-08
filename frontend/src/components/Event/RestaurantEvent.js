@@ -2,18 +2,30 @@ import React, { Component } from "react";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import axios from "axios";
-import { Button, Alert, Col, Row } from "react-bootstrap";
+import { Button, Alert, Col, Row, Pagination } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import serverAddress from "../../config";
+import { getPageCount, getPageObjects } from "../../pageutils";
 
 class RestaurantEvent extends Component {
   constructor(props) {
     super(props);
     this.setState({
       noRecords: false,
+      curPage: 1,
     });
+    this.onPage = this.onPage.bind(this);
   }
+
+  onPage = (e) => {
+    console.log(e.target);
+    console.log(e.target.text);
+    this.setState({
+      curPage: e.target.text,
+    });
+  };
+
   componentDidMount() {
     axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
@@ -35,6 +47,7 @@ class RestaurantEvent extends Component {
           } else {
             this.setState({
               allEvents: response.data,
+              curPage: 1,
             });
           }
         }
@@ -51,11 +64,26 @@ class RestaurantEvent extends Component {
     let redirectVar = null;
     let messageTag = null;
     let eventsTag = null;
+    let paginationItemsTag = [];
     if (!cookie.load("cookie")) {
       redirectVar = <Redirect to="/login" />;
     }
     if (this.state && this.state.allEvents) {
-      eventsTag = this.state.allEvents.map((event) => {
+      let count = getPageCount(this.state.allEvents.length);
+      let active = this.state.curPage;
+      for (let number = 1; number <= count; number++) {
+        paginationItemsTag.push(
+          <Pagination.Item key={number} active={number === active}>
+            {number}
+          </Pagination.Item>
+        );
+      }
+      let filteredObjects = getPageObjects(
+        this.state.curPage,
+        this.state.allEvents
+      );
+
+      eventsTag = filteredObjects.map((event) => {
         var imageSrc = `${serverAddress}/yelp/images/event/${event.event_image}`;
         return (
           <Col sm={3}>
@@ -95,6 +123,14 @@ class RestaurantEvent extends Component {
             <br />
             {messageTag}
             <Row>{eventsTag}</Row>
+            <br />
+            <br />
+            <Pagination
+              onClick={this.onPage}
+              style={{ display: "inline-flex" }}
+            >
+              {paginationItemsTag}
+            </Pagination>
             <br />
             <br />
             <br />

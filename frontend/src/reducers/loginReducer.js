@@ -5,6 +5,8 @@ const initialState = {
 };
 
 export default function (state = initialState, action) {
+  console.log("login reducer");
+  console.log(action);
   switch (action.type) {
     case CUSTOMER_LOGIN:
       return {

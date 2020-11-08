@@ -58,6 +58,7 @@ const restaurant = require("./routes/restaurant");
 const menu = require("./routes/menu");
 const event = require("./routes/event");
 const order = require("./routes/order");
+const message = require("./routes/message");
 //const profile = require("./routes/profile");
 //const restaurant = require("./routes/restaurant");
 
@@ -69,6 +70,7 @@ app.use("/yelp/restaurant", restaurant);
 app.use("/yelp/menu", menu);
 app.use("/yelp/event", event);
 app.use("/yelp/order", order);
+app.use("/yelp/message", message);
 //app.use("/yelp/profile", profile);
 //app.use("/yelp/restaurant", restaurant);
 

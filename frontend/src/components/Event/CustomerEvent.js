@@ -9,27 +9,42 @@ import {
   Alert,
   Col,
   Row,
+  Dropdown,
+  DropdownButton,
+  Pagination,
 } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import serverAddress from "../../config";
+import { getPageCount, getPageObjects } from "../../pageutils";
 
 class CustomerEvent extends Component {
   constructor(props) {
     super(props);
     this.setState({
       search_input: "",
-      noRecords: false,
+      noRecords: 0,
+      curPage: 1,
     });
 
     this.onChange = this.onChange.bind(this);
     this.onSearch = this.onSearch.bind(this);
     this.MyEvents = this.MyEvents.bind(this);
     this.getRegisteredEvents = this.getRegisteredEvents.bind(this);
+    this.onSort = this.onSort.bind(this);
+    this.onPage = this.onPage.bind(this);
     //this.onCuisineSelect = this.onCuisineSelect.bind(this);
 
     this.getRegisteredEvents();
   }
+
+  onPage = (e) => {
+    console.log(e.target);
+    console.log(e.target.text);
+    this.setState({
+      curPage: e.target.text,
+    });
+  };
 
   getRegisteredEvents = () => {
     axios.defaults.headers.common["authorization"] = localStorage.getItem(
@@ -81,6 +96,7 @@ class CustomerEvent extends Component {
             this.setState({
               allEvents: response.data,
               filteredEvents: response.data,
+              curPage: 1,
             });
           }
         }
@@ -150,11 +166,32 @@ class CustomerEvent extends Component {
     }
   };
 
+  onSort = (e) => {
+    let filter = e.target.text;
+    let filteredList = this.state.allEvents;
+    if (filter === "Descending") {
+      filteredList.sort(function (a, b) {
+        return new Date(b.event_date) - new Date(a.event_date);
+      });
+      this.setState({
+        filteredEvents: filteredList,
+      });
+    } else if (filter === "Ascending") {
+      filteredList.sort(function (a, b) {
+        return new Date(a.event_date) - new Date(b.event_date);
+      });
+      this.setState({
+        filteredEvents: filteredList,
+      });
+    }
+  };
+
   render() {
     let redirectVar = null;
     let messageTag = null;
     let eventsTag = null;
     let myEventsTag = null;
+    let paginationItemsTag = [];
     if (!cookie.load("cookie")) {
       redirectVar = <Redirect to="/login" />;
     }
@@ -170,9 +207,40 @@ class CustomerEvent extends Component {
       </Button>
     );
 
+    let sortList = ["Ascending", "Descending"];
+    let sortTag = sortList.map((sort) => {
+      return (
+        <Dropdown.Item href="#" onClick={this.onSort}>
+          {sort}
+        </Dropdown.Item>
+      );
+    });
+
     if (this.state && this.state.filteredEvents) {
       console.log("render");
-      eventsTag = this.state.filteredEvents.map((event) => {
+
+      let count = getPageCount(this.state.filteredEvents.length);
+      let active = this.state.curPage;
+      for (let number = 1; number <= count; number++) {
+        paginationItemsTag.push(
+          <Pagination.Item key={number} active={number === active}>
+            {number}
+          </Pagination.Item>
+        );
+      }
+      let filteredEvents = getPageObjects(
+        this.state.curPage,
+        this.state.filteredEvents
+      );
+
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      eventsTag = filteredEvents.map((event) => {
+        let date = new Date(event.event_date);
         console.log(event);
         var imageSrc = `${serverAddress}/yelp/images/event/${event.event_image}}`;
         return (
@@ -187,6 +255,9 @@ class CustomerEvent extends Component {
                 <Card.Title>{event.event_name}</Card.Title>
               </Link>
               <Card.Body>
+                <Card.Text>
+                  {date.toLocaleDateString(undefined, options)}
+                </Card.Text>
                 <Card.Text>{event.event_description}</Card.Text>
               </Card.Body>
             </Card>
@@ -231,12 +302,31 @@ class CustomerEvent extends Component {
               <br />
               <InputGroup style={{ width: "50%", display: "flex" }} size="lg">
                 {myEventsTag}
+                &nbsp;&nbsp;
+                <DropdownButton
+                  as={InputGroup.Append}
+                  variant="outline-secondary"
+                  title="Sort Events"
+                  id="input-group-dropdown-2"
+                  style={{ float: "right" }}
+                >
+                  {sortTag}
+                </DropdownButton>
               </InputGroup>
             </form>
             <br />
             <br />
             {messageTag}
             <Row>{eventsTag}</Row>
+
+            <br />
+            <br />
+            <Pagination
+              onClick={this.onPage}
+              style={{ display: "inline-flex" }}
+            >
+              {paginationItemsTag}
+            </Pagination>
           </center>
         </div>
       </div>

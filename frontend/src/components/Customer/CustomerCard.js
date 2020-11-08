@@ -2,12 +2,13 @@ import React, { Component } from "react";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import axios from "axios";
-import { Col, Row, Button } from "react-bootstrap";
+import { Col, Row, Button, Alert } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import NavBar from "../LandingPage/Navbar.js";
 import serverAddress from "../../config";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import {
   getCustomerCard,
   followCustomer,
@@ -21,6 +22,7 @@ class CustomerCard extends Component {
     this.setState({
       disable: false,
       buttonName: "Follow",
+      msgButtonName: "Message",
     });
     this.enableButton = this.enableButton.bind(this);
     this.onClick = this.onClick.bind(this);
@@ -117,6 +119,8 @@ class CustomerCard extends Component {
 
     let disable = this.state.disable;
     let buttonName = this.state.buttonName;
+    let buttonTag = null;
+    let messageTag = null;
     if (this.state && this.state.customer) {
       var imgSrc = `${serverAddress}/yelp/images/customer/${this.state.customer.cust_image}`;
       console.log("Check if already following");
@@ -130,6 +134,42 @@ class CustomerCard extends Component {
           disable = true;
           buttonName = "Following";
         }
+      }
+
+      if (localStorage.getItem("customer_id")) {
+        buttonTag = (
+          <Button
+            variant="primary"
+            onClick={this.onClick}
+            disabled={disable}
+            style={{ background: "#d32323" }}
+          >
+            {buttonName} {this.state.customer.cust_name}
+          </Button>
+        );
+      }
+
+      if (localStorage.getItem("restaurant_id")) {
+        messageTag = (
+          <Link
+            to={{
+              pathname: "/messagedetails",
+              state: {
+                customer_id: this.state.customer._id,
+                restaurant_id: localStorage.getItem("restaurant_id"),
+                from: localStorage.getItem("restaurant_id"),
+              },
+            }}
+          >
+            <Button
+              variant="primary"
+              name="message_btn"
+              style={{ background: "#d32323" }}
+            >
+              Message {this.state.customer.cust_name}
+            </Button>
+          </Link>
+        );
       }
 
       customerTag = (
@@ -163,20 +203,14 @@ class CustomerCard extends Component {
                   Phone no: {this.state.customer.phone_number || ""}
                 </Card.Text>
                 <Card.Text>Bio: {this.state.customer.headline || ""}</Card.Text>
-                <Button
-                  variant="primary"
-                  onClick={this.onClick}
-                  disabled={disable}
-                >
-                  {buttonName} {this.state.customer.cust_name}
-                </Button>
+                {buttonTag}
+                {messageTag}
               </Card.Body>
             </Card>
           </Col>
         </Row>
       );
     }
-
     return (
       <div>
         {redirectVar}

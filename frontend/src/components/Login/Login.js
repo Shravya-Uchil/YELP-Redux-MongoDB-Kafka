@@ -95,11 +95,13 @@ class Login extends Component {
         localStorage.setItem("email_id", decoded.email_id);
         localStorage.setItem("customer_id", decoded.customer_id);
         localStorage.setItem("login_type", "customer");
+        localStorage.setItem("from", decoded.from);
         redirectVar = <Redirect to="/home" />;
       } else {
         localStorage.setItem("email_id", decoded.email_id);
         localStorage.setItem("restaurant_id", decoded.customer_id);
         localStorage.setItem("login_type", "restaurant");
+        localStorage.setItem("from", decoded.from);
         redirectVar = <Redirect to="/home" />;
       }
     }

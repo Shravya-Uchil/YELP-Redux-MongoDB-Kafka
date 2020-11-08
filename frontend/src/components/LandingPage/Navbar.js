@@ -65,6 +65,12 @@ class Navbar extends Component {
           <li>{usersTab}</li>
           &nbsp;&nbsp;&nbsp;&nbsp;
           <li>
+            <Link to="/messages" id="login-link">
+              Messages
+            </Link>
+          </li>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <li>
             <Link to="/" id="login-link" onClick={this.handleLogout}>
               <span className="glyphicon glyphicon-user"></span>Logout
             </Link>

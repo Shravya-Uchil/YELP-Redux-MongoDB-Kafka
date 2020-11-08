@@ -191,7 +191,7 @@ async function updateOrderStatus(msg, callback) {
       let updated = await order.save();
       if (updated) {
         response.status = 200;
-        response.data = "UPDATED";
+        response.data = "UPDATED_ORDER_STATUS";
         return callback(null, response);
       } else {
         response.status = 500;
@@ -222,7 +222,7 @@ async function updateDeliveryStatus(msg, callback) {
       let updated = await order.save();
       if (updated) {
         response.status = 200;
-        response.data = "UPDATED";
+        response.data = "UPDATED_DELIVERY_STATUS";
         return callback(null, response);
       } else {
         response.status = 500;

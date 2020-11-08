@@ -22,6 +22,8 @@ import CustomerOrderHistory from "./Order/CustomerOrderHistory";
 import OrderDetails from "./Order/OrderDetails";
 import RestaurantOrders from "./Order/RestaurantOrders";
 import Users from "./Customer/Users";
+import Messages from "./Message/Messages";
+import MessageDetails from "./Message/MessageDetails";
 //Create a Main Component
 class Main extends Component {
   render() {
@@ -50,6 +52,8 @@ class Main extends Component {
         <Route path="/ordercard" component={OrderDetails} />
         <Route path="/restaurantorders" component={RestaurantOrders} />
         <Route path="/users" component={Users} />
+        <Route path="/messages" component={Messages} />
+        <Route path="/messagedetails" component={MessageDetails} />
       </div>
     );
   }

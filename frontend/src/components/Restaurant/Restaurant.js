@@ -12,12 +12,14 @@ import {
   Dropdown,
   DropdownButton,
   InputGroup,
+  Pagination,
 } from "react-bootstrap";
 import cookie from "react-cookies";
 import NavBar from "../LandingPage/Navbar.js";
 import { Link } from "react-router-dom";
 import StarRatings from "react-star-ratings";
 import serverAddress from "../../config";
+import { getPageCount, getPageObjects } from "../../pageutils";
 
 class Restaurant extends Component {
   constructor(props) {
@@ -27,6 +29,7 @@ class Restaurant extends Component {
       menu_items: [],
       review_rating: 0,
       order_type: "PICKUP",
+      curPage: 1,
     });
     this.ItemsForCategory = this.ItemsForCategory.bind(this);
     this.getAllMenuItems = this.getAllMenuItems.bind(this);
@@ -34,6 +37,9 @@ class Restaurant extends Component {
     this.onChange = this.onChange.bind(this);
     this.changeRating = this.changeRating.bind(this);
     this.onOrder = this.onOrder.bind(this);
+    this.calculatePages = this.calculatePages.bind(this);
+    this.getCategories = this.getCategories.bind(this);
+    this.onPage = this.onPage.bind(this);
     this.getAllMenuItems().then((ret) => {
       this.getAllCategories();
     });
@@ -41,7 +47,18 @@ class Restaurant extends Component {
     console.log("End constructor");
   }
 
+  onPage = (e) => {
+    console.log(e.target);
+    console.log(e.target.text);
+    this.setState({
+      curPage: e.target.text,
+    });
+  };
+
   componentWillMount() {
+    this.setState({
+      curPage: 1,
+    });
     console.log("mount");
     localStorage.removeItem("cart_list");
     if (this.props.location.state) {
@@ -137,29 +154,21 @@ class Restaurant extends Component {
     //console.log("filter item for:");
     console.log("menu_category");
     console.log(menu_category);
-    console.log("this.state.menu_items");
-    console.log(this.state.menu_items);
+    //console.log("this.state.menu_items");
+    //console.log(this.state.menu_items);
     var itemsSection = [];
-    console.log("menu_category.category_name");
-    console.log(menu_category.category_name);
+    //console.log("menu_category.category_name");
+    //console.log(menu_category.category_name);
     if (
-      this.state &&
-      this.state.menu_items &&
-      this.state.menu_items.length > 0
+      menu_category &&
+      menu_category.items &&
+      menu_category.items.length > 0
     ) {
-      var filteredItems = this.state.menu_items.filter(
-        // (_item) => _item.category_id === menu_category.category_id
-        (_item) => _item.item_category === menu_category._id
-      );
-      console.log("filteredItems");
-      console.log(filteredItems);
-      if (filteredItems.length > 0) {
-        var tag = <h4>{menu_category.category_name}</h4>;
-        itemsSection.push(tag);
-        for (var i = 0; i < filteredItems.length; i++) {
-          var item = <ItemCard menu_item={filteredItems[i]} />;
-          itemsSection.push(item);
-        }
+      var tag = <h4>{menu_category.category.category_name}</h4>;
+      itemsSection.push(tag);
+      for (var i = 0; i < menu_category.items.length; i++) {
+        var item = <ItemCard menu_item={menu_category.items[i]} />;
+        itemsSection.push(item);
       }
       return itemsSection;
     }
@@ -263,8 +272,81 @@ class Restaurant extends Component {
     });
   };
 
+  calculatePages() {
+    let count = getPageCount(this.state.menu_items.length);
+    let active = this.state.curPage;
+    let paginationItemsTag = [];
+    for (let number = 1; number <= count; number++) {
+      paginationItemsTag.push(
+        <Pagination.Item key={number} active={number === active}>
+          {number}
+        </Pagination.Item>
+      );
+    }
+    return paginationItemsTag;
+  }
+
+  getCategories() {
+    let categories = this.state.menu_category;
+    let items = this.state.menu_items;
+    let i = 0;
+    let list = [];
+    for (i = 0; i < categories.length; i++) {
+      var filteredItems = items.filter(
+        (_item) => _item.item_category === categories[i]._id
+      );
+      let data = { category: categories[i], items: [] };
+      data.items = filteredItems;
+      list.push(data);
+    }
+    let curPage = this.state.curPage;
+    let pageSize = 5;
+    let start = pageSize * (curPage - 1);
+    let end = start + 5;
+    let count = 0;
+    let startCount = 0;
+    let filteredList = [];
+    let insert = false;
+    for (i = 0; i < list.length; i++) {
+      insert = false;
+      let data = { category: list[i].category, items: [] };
+      for (var j = 0; j < list[i].items.length; j++) {
+        /*console.log(
+          "count = ",
+          count,
+          ", startCount = ",
+          startCount,
+          "start = ",
+          start
+        );*/
+        if (startCount >= start) {
+          insert = true;
+          data.items.push(list[i].items[j]);
+          count++;
+        }
+        if (count === pageSize) {
+          filteredList.push(data);
+          //console.log(filteredList);
+          return filteredList;
+        }
+        startCount++;
+      }
+      if (insert) {
+        filteredList.push(data);
+      }
+      if (count === pageSize) {
+        //console.log(filteredList);
+        return filteredList;
+      }
+    }
+
+    //console.log(filteredList);
+    return filteredList;
+  }
+
   render() {
     let message = null;
+    let paginationItemsTag = [];
     console.log("render");
     let redirect = null;
     if (!cookie.load("cookie")) {
@@ -298,8 +380,13 @@ class Restaurant extends Component {
       this.state.menu_category &&
       this.state.menu_category.length > 0
     ) {
-      for (var i = 0; i < this.state.menu_category.length; i++) {
-        category = this.ItemsForCategory(this.state.menu_category[i]);
+      paginationItemsTag = this.calculatePages();
+      let filteredList = this.getCategories();
+      console.log("*************************************");
+      console.log(filteredList);
+      console.log("*************************************");
+      for (var i = 0; i < filteredList.length; i++) {
+        category = this.ItemsForCategory(filteredList[i]);
         menuTag.push(category);
       }
     }
@@ -420,6 +507,11 @@ class Restaurant extends Component {
           </Form>
           <br />
           <Container>{menuTag}</Container>
+          <br />
+          <br />
+          <Pagination onClick={this.onPage} style={{ display: "inline-flex" }}>
+            {paginationItemsTag}
+          </Pagination>
         </Container>
         <center>
           <DropdownButton
