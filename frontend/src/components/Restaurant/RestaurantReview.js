@@ -2,18 +2,31 @@ import React, { Component } from "react";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import axios from "axios";
-import { Card } from "react-bootstrap";
+import { Card, Pagination } from "react-bootstrap";
 import NavBar from "../LandingPage/Navbar.js";
 import StarRatings from "react-star-ratings";
 import { Link } from "react-router-dom";
 import serverAddress from "../../config";
+import { getPageCount, getPageObjects } from "../../pageutils";
 
 class RestaurantReview extends Component {
   constructor(props) {
     super(props);
+    this.onPage = this.onPage.bind(this);
   }
 
+  onPage = (e) => {
+    console.log(e.target);
+    console.log(e.target.text);
+    this.setState({
+      curPage: e.target.text,
+    });
+  };
+
   componentDidMount() {
+    this.setState({
+      curPage: 1,
+    });
     let res_id = null;
     if (this.props.restaurant_details) {
       res_id = this.props.restaurant_details._id;
@@ -46,12 +59,26 @@ class RestaurantReview extends Component {
     console.log(this.state);
     let redirectVar = null;
     let reviewsTag = null;
+    let paginationItemsTag = [];
     if (!cookie.load("cookie")) {
       redirectVar = <Redirect to="/login" />;
     }
 
     if (this.state && this.state.reviews) {
-      reviewsTag = this.state.reviews.map((review) => {
+      let count = getPageCount(this.state.reviews.length);
+      let active = this.state.curPage;
+      for (let number = 1; number <= count; number++) {
+        paginationItemsTag.push(
+          <Pagination.Item key={number} active={number === active}>
+            {number}
+          </Pagination.Item>
+        );
+      }
+      let filteredObjects = getPageObjects(
+        this.state.curPage,
+        this.state.reviews
+      );
+      reviewsTag = filteredObjects.map((review) => {
         return (
           <Card
             bg="white"
@@ -86,6 +113,13 @@ class RestaurantReview extends Component {
         {redirectVar}
         {navbar}
         <div>{reviewsTag}</div>
+        <center>
+          <br />
+          <br />
+          <Pagination onClick={this.onPage} style={{ display: "inline-flex" }}>
+            {paginationItemsTag}
+          </Pagination>
+        </center>
       </div>
     );
   }

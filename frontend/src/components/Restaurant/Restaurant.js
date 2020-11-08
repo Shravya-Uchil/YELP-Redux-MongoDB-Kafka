@@ -273,7 +273,7 @@ class Restaurant extends Component {
   };
 
   calculatePages() {
-    let count = getPageCount(this.state.menu_items.length);
+    let count = getPageCount(this.state.menu_items.length, 5);
     let active = this.state.curPage;
     let paginationItemsTag = [];
     for (let number = 1; number <= count; number++) {
@@ -509,9 +509,14 @@ class Restaurant extends Component {
           <Container>{menuTag}</Container>
           <br />
           <br />
-          <Pagination onClick={this.onPage} style={{ display: "inline-flex" }}>
-            {paginationItemsTag}
-          </Pagination>
+          <center>
+            <Pagination
+              onClick={this.onPage}
+              style={{ display: "inline-flex" }}
+            >
+              {paginationItemsTag}
+            </Pagination>
+          </center>
         </Container>
         <center>
           <DropdownButton

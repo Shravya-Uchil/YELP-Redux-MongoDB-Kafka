@@ -1,4 +1,4 @@
-export function getPageCount(length) {
+export function getPageCount(length, size = 4) {
   let count = 1;
   if (length % 4 == 0) {
     count = length / 4;

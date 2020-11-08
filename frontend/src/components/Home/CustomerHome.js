@@ -10,6 +10,7 @@ import {
   Alert,
   Col,
   Row,
+  Pagination,
 } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -22,6 +23,7 @@ import {
 } from "../../actions/customerHomeActions";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { getPageCount, getPageObjects } from "../../pageutils";
 
 Geocode.setApiKey("AIzaSyAIzrgRfxiIcZhQe3Qf5rIIRx6exhZPwwE");
 Geocode.setLanguage("en");
@@ -43,16 +45,26 @@ class CustomerHome extends Component {
     this.onChange = this.onChange.bind(this);
     this.onSearch = this.onSearch.bind(this);
     this.onCuisineSelect = this.onCuisineSelect.bind(this);
+    this.onPage = this.onPage.bind(this);
     this.getCustomerInfo();
   }
 
-  // redux addition
+  onPage = (e) => {
+    console.log(e.target);
+    console.log(e.target.text);
+    this.setState({
+      curPage: e.target.text,
+    });
+  };
 
   componentWillReceiveProps(nextProps) {
     console.log(
       "We in Customer Home props received, next prop is: ",
       nextProps
     );
+    this.setState({
+      curPage: 1,
+    });
     if (nextProps.customer) {
       console.log("Customer response");
       console.log(nextProps);
@@ -293,6 +305,7 @@ class CustomerHome extends Component {
     let redirectVar = null;
     let messageTag = null;
     let restaurantsTag = null;
+    let paginationItemsTag = [];
     if (!cookie.load("cookie")) {
       redirectVar = <Redirect to="/login" />;
     }
@@ -333,8 +346,22 @@ class CustomerHome extends Component {
       );
     });
 
+    let filteredObjects = [];
     if (this.state && this.state.filteredRestaurants) {
-      restaurantsTag = this.state.filteredRestaurants.map((restaurant) => {
+      let count = getPageCount(this.state.filteredRestaurants.length);
+      let active = this.state.curPage;
+      for (let number = 1; number <= count; number++) {
+        paginationItemsTag.push(
+          <Pagination.Item key={number} active={number === active}>
+            {number}
+          </Pagination.Item>
+        );
+      }
+      filteredObjects = getPageObjects(
+        this.state.curPage,
+        this.state.filteredRestaurants
+      );
+      restaurantsTag = filteredObjects.map((restaurant) => {
         var imageSrc = `${serverAddress}/yelp/images/restaurant/${restaurant.restaurant_image}`;
         return (
           <Col sm={3}>
@@ -365,8 +392,8 @@ class CustomerHome extends Component {
 
     let center = null;
     let locList = [];
-    if (this.state && this.state.filteredRestaurants) {
-      locList = this.state.filteredRestaurants;
+    if (filteredObjects.length) {
+      locList = filteredObjects;
     }
     if (this.state && this.state.center) {
       center = this.state.center;
@@ -428,6 +455,16 @@ class CustomerHome extends Component {
             <br />
             {messageTag}
             <Row>{restaurantsTag}</Row>
+            <center>
+              <br />
+              <br />
+              <Pagination
+                onClick={this.onPage}
+                style={{ display: "inline-flex" }}
+              >
+                {paginationItemsTag}
+              </Pagination>
+            </center>
             <Map locationList={locList} center={location} zoomLevel={10} />
           </center>
         </div>

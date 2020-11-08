@@ -2,16 +2,18 @@ import React, { Component } from "react";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
 import axios from "axios";
-import { Button, Col, Container } from "react-bootstrap";
+import { Button, Col, Container, Pagination } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import NavBar from "../LandingPage/Navbar.js";
 import { Link } from "react-router-dom";
 import serverAddress from "../../config";
+import { getPageCount, getPageObjects } from "../../pageutils";
 
 class EventDetails extends Component {
   constructor(props) {
     super(props);
     this.onRegister = this.onRegister.bind(this);
+    this.onPage = this.onPage.bind(this);
   }
 
   onRegister = (e) => {
@@ -44,7 +46,18 @@ class EventDetails extends Component {
       });
   };
 
+  onPage = (e) => {
+    console.log(e.target);
+    console.log(e.target.text);
+    this.setState({
+      curPage: e.target.text,
+    });
+  };
+
   componentDidMount() {
+    this.setState({
+      curPage: 1,
+    });
     if (localStorage.getItem("customer_id")) {
       axios.defaults.headers.common["authorization"] = localStorage.getItem(
         "token"
@@ -101,6 +114,7 @@ class EventDetails extends Component {
     let eventTag = null;
     let registerTag = null;
     let registered_customers = null;
+    let paginationItemsTag = [];
     if (!cookie.load("cookie")) {
       redirectVar = <Redirect to="/login" />;
     }
@@ -132,7 +146,20 @@ class EventDetails extends Component {
       console.log("this.state");
       console.log(this.state);
       if (this.state && this.state.registered_customers) {
-        registered_customers = this.state.registered_customers.map((cust) => {
+        let count = getPageCount(this.state.registered_customers.length);
+        let active = this.state.curPage;
+        for (let number = 1; number <= count; number++) {
+          paginationItemsTag.push(
+            <Pagination.Item key={number} active={number === active}>
+              {number}
+            </Pagination.Item>
+          );
+        }
+        let filteredObjects = getPageObjects(
+          this.state.curPage,
+          this.state.registered_customers
+        );
+        registered_customers = filteredObjects.map((cust) => {
           var imageSrc = `${serverAddress}/yelp/images/customer/${cust.cust_image}`;
           return (
             <Col sm={3} style={{ margin: "2%" }}>
@@ -181,6 +208,16 @@ class EventDetails extends Component {
         <Container style={{ margin: "5%" }}>
           {header}
           {registered_customers}
+          <br />
+          <br />
+          <center>
+            <Pagination
+              onClick={this.onPage}
+              style={{ display: "inline-flex" }}
+            >
+              {paginationItemsTag}
+            </Pagination>
+          </center>
         </Container>
       </div>
     );

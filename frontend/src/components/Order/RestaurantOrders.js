@@ -9,6 +9,7 @@ import {
   Alert,
   Dropdown,
   DropdownButton,
+  Pagination,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import NavBar from "../LandingPage/Navbar.js";
@@ -21,6 +22,7 @@ import {
   updateDeliveryStatus,
 } from "../../actions/restaurantOrderActions";
 import PropTypes from "prop-types";
+import { getPageCount, getPageObjects } from "../../pageutils";
 
 class RestaurantOrders extends Component {
   constructor(props) {
@@ -30,14 +32,30 @@ class RestaurantOrders extends Component {
       stateValue: "Change Order Status",
       filter_title: "Order Status",
       noRecords: 0,
+      curPage: 1,
     };
 
     this.changeStateValue = this.changeStateValue.bind(this);
     this.changeDeliveryStateValue = this.changeDeliveryStateValue.bind(this);
     this.onUpdateDelivery = this.onUpdateDelivery.bind(this);
     this.onFilterSelect = this.onFilterSelect.bind(this);
+    this.onPage = this.onPage.bind(this);
     this.getOrderHistory();
   }
+
+  componentWillMount() {
+    this.setState({
+      curPage: 1,
+    });
+  }
+
+  onPage = (e) => {
+    console.log(e.target);
+    console.log(e.target.text);
+    this.setState({
+      curPage: e.target.text,
+    });
+  };
 
   getOrderHistory = () => {
     this.props.getOrders();
@@ -244,6 +262,7 @@ class RestaurantOrders extends Component {
     let message = null;
     let orderCards = null;
     let redirectVar = null;
+    let paginationItemsTag = [];
     if (!localStorage.getItem("restaurant_id")) {
       redirectVar = <Redirect to="/login" />;
     }
@@ -268,7 +287,22 @@ class RestaurantOrders extends Component {
 
     if (this.state && this.state.orders_history_filtered) {
       if (this.state.orders_history_filtered.length > 0) {
-        orderCards = this.state.orders_history_filtered.map((order) => {
+        // Pagination
+        let count = getPageCount(this.state.orders_history_filtered.length);
+        let active = this.state.curPage;
+        for (let number = 1; number <= count; number++) {
+          paginationItemsTag.push(
+            <Pagination.Item key={number} active={number === active}>
+              {number}
+            </Pagination.Item>
+          );
+        }
+        let filteredObjects = getPageObjects(
+          this.state.curPage,
+          this.state.orders_history_filtered
+        );
+
+        orderCards = filteredObjects.map((order) => {
           let delivery_details = null;
           let details = null;
           if (order.order_type === "DELIVERY") {
@@ -447,6 +481,14 @@ class RestaurantOrders extends Component {
             <br />
             <br />
             {orderCards}
+            <br />
+            <br />
+            <Pagination
+              onClick={this.onPage}
+              style={{ display: "inline-flex" }}
+            >
+              {paginationItemsTag}
+            </Pagination>
           </Container>
         </div>
       </div>

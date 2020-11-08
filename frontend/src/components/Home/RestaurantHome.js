@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import cookie from "react-cookies";
 import { Redirect } from "react-router";
-import { Card, Container, Col, Row, Button } from "react-bootstrap";
+import { Card, Container, Col, Row, Button, Pagination } from "react-bootstrap";
 import axios from "axios";
 import Reviews from "../Restaurant/RestaurantReview.js";
 import ItemCard from "../Restaurant/Item";
@@ -14,6 +14,7 @@ import {
 } from "../../actions/restaurantHomeActions";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { getPageCount, getPageObjects } from "../../pageutils";
 
 class RestaurantHome extends Component {
   constructor(props) {
@@ -24,12 +25,26 @@ class RestaurantHome extends Component {
     this.ItemsForCategory = this.ItemsForCategory.bind(this);
     this.getAllMenuItems = this.getAllMenuItems.bind(this);
     this.getAllCategories = this.getAllCategories.bind(this);
+    this.onPage = this.onPage.bind(this);
+    this.calculatePages = this.calculatePages.bind(this);
+    this.getCategories = this.getCategories.bind(this);
     this.getAllMenuItems();
     this.getAllCategories();
   }
 
+  onPage = (e) => {
+    console.log(e.target);
+    console.log(e.target.text);
+    this.setState({
+      curPage: e.target.text,
+    });
+  };
+
   componentWillMount() {
     console.log("Get restaurant");
+    this.setState({
+      curPage: 1,
+    });
     this.props.getRestaurantById(localStorage.getItem("restaurant_id"));
     /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
@@ -122,22 +137,15 @@ class RestaurantHome extends Component {
 
     //console.log(menu_category.category_name);
     if (
-      this.state &&
-      this.state.menu_items &&
-      this.state.menu_items.length > 0
+      menu_category &&
+      menu_category.items &&
+      menu_category.items.length > 0
     ) {
-      var filteredItems = this.state.menu_items.filter(
-        //(_item) => _item.category_id === menu_category.category_id
-        (_item) => _item.item_category === menu_category._id
-      );
-      //console.log(filteredItems);
-      if (filteredItems.length > 0) {
-        var tag = <h4>{menu_category.category_name}</h4>;
-        itemsSection.push(tag);
-        for (var i = 0; i < filteredItems.length; i++) {
-          var item = <ItemCard menu_item={filteredItems[i]} />;
-          itemsSection.push(item);
-        }
+      var tag = <h4>{menu_category.category.category_name}</h4>;
+      itemsSection.push(tag);
+      for (var i = 0; i < menu_category.items.length; i++) {
+        var item = <ItemCard menu_item={menu_category.items[i]} />;
+        itemsSection.push(item);
       }
       return itemsSection;
     }
@@ -172,12 +180,85 @@ class RestaurantHome extends Component {
     }
   }
 
+  calculatePages() {
+    let count = getPageCount(this.state.menu_items.length, 5);
+    let active = this.state.curPage;
+    let paginationItemsTag = [];
+    for (let number = 1; number <= count; number++) {
+      paginationItemsTag.push(
+        <Pagination.Item key={number} active={number === active}>
+          {number}
+        </Pagination.Item>
+      );
+    }
+    return paginationItemsTag;
+  }
+
+  getCategories() {
+    let categories = this.state.menu_category;
+    let items = this.state.menu_items;
+    let i = 0;
+    let list = [];
+    for (i = 0; i < categories.length; i++) {
+      var filteredItems = items.filter(
+        (_item) => _item.item_category === categories[i]._id
+      );
+      let data = { category: categories[i], items: [] };
+      data.items = filteredItems;
+      list.push(data);
+    }
+    let curPage = this.state.curPage;
+    let pageSize = 5;
+    let start = pageSize * (curPage - 1);
+    let end = start + 5;
+    let count = 0;
+    let startCount = 0;
+    let filteredList = [];
+    let insert = false;
+    for (i = 0; i < list.length; i++) {
+      insert = false;
+      let data = { category: list[i].category, items: [] };
+      for (var j = 0; j < list[i].items.length; j++) {
+        /*console.log(
+          "count = ",
+          count,
+          ", startCount = ",
+          startCount,
+          "start = ",
+          start
+        );*/
+        if (startCount >= start) {
+          insert = true;
+          data.items.push(list[i].items[j]);
+          count++;
+        }
+        if (count === pageSize) {
+          filteredList.push(data);
+          //console.log(filteredList);
+          return filteredList;
+        }
+        startCount++;
+      }
+      if (insert) {
+        filteredList.push(data);
+      }
+      if (count === pageSize) {
+        //console.log(filteredList);
+        return filteredList;
+      }
+    }
+
+    //console.log(filteredList);
+    return filteredList;
+  }
+
   render() {
     let redirectVar = null;
     let restaurantDetails = null;
     let reviews = null;
     let category = null;
     let menuTag = [];
+    let paginationItemsTag = [];
     if (!cookie.load("cookie")) {
       redirectVar = <Redirect to="/login" />;
     }
@@ -233,8 +314,13 @@ class RestaurantHome extends Component {
       this.state.menu_category &&
       this.state.menu_category.length > 0
     ) {
-      for (var i = 0; i < this.state.menu_category.length; i++) {
-        category = this.ItemsForCategory(this.state.menu_category[i]);
+      paginationItemsTag = this.calculatePages();
+      let filteredList = this.getCategories();
+      console.log("*************************************");
+      console.log(filteredList);
+      console.log("*************************************");
+      for (var i = 0; i < filteredList.length; i++) {
+        category = this.ItemsForCategory(filteredList[i]);
         menuTag.push(category);
       }
     }
@@ -255,6 +341,14 @@ class RestaurantHome extends Component {
               </Button>
             </Link>
             <Container>{menuTag}</Container>
+            <center>
+              <Pagination
+                onClick={this.onPage}
+                style={{ display: "inline-flex" }}
+              >
+                {paginationItemsTag}
+              </Pagination>
+            </center>
             <b>Reviews</b>
             <Container>{reviews}</Container>
           </Container>

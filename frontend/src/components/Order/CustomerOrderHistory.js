@@ -9,21 +9,38 @@ import {
   Alert,
   Dropdown,
   DropdownButton,
+  Pagination,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import NavBar from "../LandingPage/Navbar.js";
 import { Redirect } from "react-router";
 import serverAddress from "../../config";
+import { getPageCount, getPageObjects } from "../../pageutils";
 
 class CustomerOrderHistory extends Component {
   constructor(props) {
     super(props);
     this.state = {
       filter_title: "Order Delivery Status",
+      curPage: 1,
     };
-
+    this.onPage = this.onPage.bind(this);
     this.getOrderHistory();
   }
+
+  componentWillMount() {
+    this.setState({
+      curPage: 1,
+    });
+  }
+
+  onPage = (e) => {
+    console.log(e.target);
+    console.log(e.target.text);
+    this.setState({
+      curPage: e.target.text,
+    });
+  };
 
   getOrderHistory = () => {
     axios.defaults.headers.common["authorization"] = localStorage.getItem(
@@ -81,6 +98,7 @@ class CustomerOrderHistory extends Component {
     let message = null;
     let orderCards = null;
     let redirectVar = null;
+    let paginationItemsTag = [];
     if (!localStorage.getItem("customer_id")) {
       redirectVar = <Redirect to="/login" />;
     }
@@ -108,7 +126,22 @@ class CustomerOrderHistory extends Component {
 
     if (this.state && this.state.orders_history_filtered) {
       if (this.state.orders_history_filtered.length > 0) {
-        orderCards = this.state.orders_history_filtered.map((order) => {
+        // Pagination
+        let count = getPageCount(this.state.orders_history_filtered.length);
+        let active = this.state.curPage;
+        for (let number = 1; number <= count; number++) {
+          paginationItemsTag.push(
+            <Pagination.Item key={number} active={number === active}>
+              {number}
+            </Pagination.Item>
+          );
+        }
+        let filteredObjects = getPageObjects(
+          this.state.curPage,
+          this.state.orders_history_filtered
+        );
+
+        orderCards = filteredObjects.map((order) => {
           return (
             <Card
               style={{ width: "50rem", margin: "2%" }}
@@ -169,6 +202,14 @@ class CustomerOrderHistory extends Component {
             <br />
             <br />
             {orderCards}
+            <br />
+            <br />
+            <Pagination
+              onClick={this.onPage}
+              style={{ display: "inline-flex" }}
+            >
+              {paginationItemsTag}
+            </Pagination>
           </Container>
         </div>
       </div>
