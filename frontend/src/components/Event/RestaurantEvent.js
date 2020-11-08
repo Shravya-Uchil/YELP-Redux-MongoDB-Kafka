@@ -7,6 +7,9 @@ import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import serverAddress from "../../config";
 import { getPageCount, getPageObjects } from "../../pageutils";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { getEventForRestaurantById } from "../../actions/eventActions";
 
 class RestaurantEvent extends Component {
   constructor(props) {
@@ -26,8 +29,35 @@ class RestaurantEvent extends Component {
     });
   };
 
+  componentWillReceiveProps(nextProps) {
+    console.log(
+      "We in Restaurant events props received, next prop is: ",
+      nextProps
+    );
+    if (nextProps.event && nextProps.event.result === "NO_RECORD") {
+      console.log("Events response no record");
+      console.log(nextProps);
+      this.setState({
+        noRecords: 1,
+      });
+    } else if (nextProps.event) {
+      console.log("Events response");
+      console.log(nextProps);
+      this.setState({
+        allEvents: nextProps.event,
+      });
+    } else {
+      console.log("Redux error. Props:");
+      console.log(nextProps);
+    }
+  }
+
   componentDidMount() {
-    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    this.setState({
+      curPage: 1,
+    });
+    this.props.getEventForRestaurantById(localStorage.getItem("restaurant_id"));
+    /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
     );
     axios
@@ -57,7 +87,7 @@ class RestaurantEvent extends Component {
       .catch((error) => {
         console.log("Error");
         console.log(error);
-      });
+      });*/
   }
 
   render() {
@@ -149,5 +179,19 @@ class RestaurantEvent extends Component {
     );
   }
 }
+
+RestaurantEvent.propTypes = {
+  getEventForRestaurantById: PropTypes.func.isRequired,
+  event: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  event: state.event.event,
+});
+
+export default connect(mapStateToProps, {
+  getEventForRestaurantById,
+})(RestaurantEvent);
+
 //export Home Component
-export default RestaurantEvent;
+//export default RestaurantEvent;

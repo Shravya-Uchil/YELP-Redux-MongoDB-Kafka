@@ -2,6 +2,7 @@ import {
   GET_ALL_MESSAGES_RESTAURANT,
   GET_ALL_MESSAGES_CUSTOMER,
   GET_MESSAGE_DETAILS,
+  SEND_MESSAGE,
 } from "../actionTypes";
 
 const initialState = {
@@ -23,6 +24,11 @@ export default function (state = initialState, action) {
         message: action.payload,
       };
     case GET_MESSAGE_DETAILS:
+      return {
+        ...state,
+        message: action.payload,
+      };
+    case SEND_MESSAGE:
       return {
         ...state,
         message: action.payload,

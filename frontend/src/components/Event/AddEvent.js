@@ -12,6 +12,9 @@ import {
 import { Redirect } from "react-router";
 import NavBar from "../LandingPage/Navbar.js";
 import serverAddress from "../../config";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { addEvent } from "../../actions/eventActions";
 
 class AddEvent extends Component {
   constructor(props) {
@@ -54,7 +57,8 @@ class AddEvent extends Component {
     //var data = Object.assign({}, this.state);
     console.log("Add event");
     console.log(data);
-    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    this.props.addEvent(data);
+    /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
     );
     axios
@@ -69,7 +73,7 @@ class AddEvent extends Component {
       .catch((error) => {
         console.log("Error");
         console.log(error);
-      });
+      });*/
   };
 
   onUpload = (e) => {
@@ -108,6 +112,20 @@ class AddEvent extends Component {
       file_text: e.target.files[0].name,
     });
   };
+
+  componentWillReceiveProps(nextProps) {
+    console.log("We in add event props received, next prop is: ", nextProps);
+    if (nextProps.result) {
+      console.log("Updated");
+      alert("Event Added!");
+      this.setState({
+        isAddDone: 1,
+      });
+    } else {
+      console.log("Redux error. Props:");
+      console.log(nextProps);
+    }
+  }
 
   render() {
     let redirectVar = null;
@@ -262,4 +280,17 @@ class AddEvent extends Component {
   }
 }
 
-export default AddEvent;
+AddEvent.propTypes = {
+  addEvent: PropTypes.func.isRequired,
+  result: PropTypes.func.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  result: state.event.result,
+});
+
+export default connect(mapStateToProps, {
+  addEvent,
+})(AddEvent);
+
+//export default AddEvent;

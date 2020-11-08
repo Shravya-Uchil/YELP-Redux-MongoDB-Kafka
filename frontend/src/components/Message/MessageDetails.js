@@ -68,7 +68,7 @@ class MessageDetails extends Component {
         message_text: this.state.message_text,
       };
       this.props.sendMessage(data);
-      alert("Message Sent");
+      //alert("Message Sent");
     }
   };
 

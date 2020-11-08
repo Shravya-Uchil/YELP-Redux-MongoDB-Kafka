@@ -67,11 +67,16 @@ async function getAllEvents(msg, callback) {
 async function getEventByName(msg, callback) {
   let err = {};
   let response = {};
+  let events = null;
   console.log("Get event by name: ", msg);
   try {
-    let events = await Event.find({
-      event_name: new RegExp(msg.body.event_name, "gi"),
-    });
+    if (msg.body.event_name == "_") {
+      events = await Event.find();
+    } else {
+      events = await Event.find({
+        event_name: new RegExp(msg.body.event_name, "gi"),
+      });
+    }
     if (events) {
       response.status = 200;
       events.forEach((obj) => renameKey(obj, "_id", "event_id"));

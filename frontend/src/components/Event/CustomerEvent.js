@@ -17,6 +17,13 @@ import { Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import serverAddress from "../../config";
 import { getPageCount, getPageObjects } from "../../pageutils";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import {
+  getAllEvents,
+  getRegisteredEvents,
+  searchEvents,
+} from "../../actions/eventActions";
 
 class CustomerEvent extends Component {
   constructor(props) {
@@ -47,7 +54,8 @@ class CustomerEvent extends Component {
   };
 
   getRegisteredEvents = () => {
-    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    this.props.getRegisteredEvents(localStorage.getItem("customer_id"));
+    /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
     );
     axios
@@ -73,11 +81,16 @@ class CustomerEvent extends Component {
       .catch((error) => {
         console.log("Error");
         console.log(error);
-      });
+      });*/
   };
 
   componentDidMount() {
-    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    this.setState({
+      curPage: 1,
+    });
+    this.props.getAllEvents();
+
+    /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
     );
     axios
@@ -104,7 +117,7 @@ class CustomerEvent extends Component {
       .catch((error) => {
         console.log("Error");
         console.log(error);
-      });
+      });*/
   }
 
   onSearch = (e) => {
@@ -116,7 +129,8 @@ class CustomerEvent extends Component {
         this.state.search_input === ""
           ? "_"
           : this.state.search_input;
-      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      this.props.searchEvents(searchInput);
+      /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
         "token"
       );
       axios
@@ -142,7 +156,7 @@ class CustomerEvent extends Component {
           if (error.response && error.response.data) {
             console.log(error.response.data);
           }
-        });
+        });*/
     }
   };
   onChange = (e) => {
@@ -185,6 +199,59 @@ class CustomerEvent extends Component {
       });
     }
   };
+
+  componentWillReceiveProps(nextProps) {
+    console.log(
+      "We in Customer events props received, next prop is: ",
+      nextProps
+    );
+    if (nextProps.event) {
+      if (nextProps.event.result === "NO_RECORD") {
+        console.log("Events response no record");
+        console.log(nextProps);
+        this.setState({
+          noRecord: 1,
+          search_input: "",
+        });
+      } else {
+        this.setState({
+          allEvents: nextProps.event,
+          filteredEvents: nextProps.event,
+        });
+      }
+    } else if (nextProps.filtered) {
+      console.log("search response");
+      console.log(nextProps);
+      if (nextProps.filtered.result === "NO_RECORD") {
+        console.log("search response no record");
+        console.log(nextProps);
+        this.setState({
+          noRecord: 1,
+          search_input: "",
+          filteredEvents: this.state.allEvents,
+        });
+      } else {
+        this.setState({
+          filteredEvents: nextProps.filtered,
+          noRecord: 0,
+          search_input: "",
+        });
+      }
+    } else if (nextProps.registered) {
+      console.log("registered response");
+      console.log(nextProps);
+      if (nextProps.registered.result === "NO_RECORD") {
+        console.log("registered response no record");
+      } else {
+        this.setState({
+          registrations: nextProps.registered,
+        });
+      }
+    } else {
+      console.log("Redux error. Props:");
+      console.log(nextProps);
+    }
+  }
 
   render() {
     let redirectVar = null;
@@ -333,5 +400,27 @@ class CustomerEvent extends Component {
     );
   }
 }
+
+CustomerEvent.propTypes = {
+  getRegisteredEvents: PropTypes.func.isRequired,
+  searchEvents: PropTypes.func.isRequired,
+  getAllEvents: PropTypes.func.isRequired,
+  event: PropTypes.object.isRequired,
+  filtered: PropTypes.object.isRequired,
+  registered: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  event: state.event.event,
+  filtered: state.event.filtered,
+  registered: state.event.registered,
+});
+
+export default connect(mapStateToProps, {
+  getRegisteredEvents,
+  searchEvents,
+  getAllEvents,
+})(CustomerEvent);
+
 //export Home Component
-export default CustomerEvent;
+//export default CustomerEvent;
