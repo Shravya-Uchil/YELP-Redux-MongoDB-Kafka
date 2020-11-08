@@ -74,7 +74,9 @@ class RestaurantProfile extends Component {
     );
     axios
       .post(
-        `${serverAddress}/yelp/images/restaurant/${this.state.restaurant_id}`,
+        `${serverAddress}/yelp/images/restaurant/${localStorage.getItem(
+          "restaurant_id"
+        )}`,
         formData,
         config
       )

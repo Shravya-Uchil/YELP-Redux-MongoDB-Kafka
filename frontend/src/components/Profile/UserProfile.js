@@ -81,7 +81,9 @@ class CustomerProfile extends Component {
     );
     axios
       .post(
-        `${serverAddress}/yelp/images/customer/${this.state.customer_id}`,
+        `${serverAddress}/yelp/images/customer/${localStorage.getItem(
+          "customer_id"
+        )}`,
         formData,
         config
       )
