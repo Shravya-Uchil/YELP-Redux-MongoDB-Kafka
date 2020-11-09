@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../mysqlDB.js");
+//const db = require("../mysqlDB.js");
 const kafka = require("../kafka/client");
 const { checkAuth } = require("../config/passport");
 

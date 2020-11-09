@@ -183,6 +183,8 @@ class CustomerEvent extends Component {
   onSort = (e) => {
     let filter = e.target.text;
     let filteredList = this.state.allEvents;
+    console.log("all events");
+    console.log(this.state.allEvents);
     if (filter === "Descending") {
       filteredList.sort(function (a, b) {
         return new Date(b.event_date) - new Date(a.event_date);
@@ -233,6 +235,7 @@ class CustomerEvent extends Component {
       } else {
         this.setState({
           filteredEvents: nextProps.filtered,
+          allEvents: nextProps.filtered,
           noRecord: 0,
           search_input: "",
         });
@@ -309,7 +312,7 @@ class CustomerEvent extends Component {
       eventsTag = filteredEvents.map((event) => {
         let date = new Date(event.event_date);
         console.log(event);
-        var imageSrc = `${serverAddress}/yelp/images/event/${event.event_image}}`;
+        var imageSrc = `${serverAddress}/yelp/images/event/${event.event_image}`;
         return (
           <Col sm={3}>
             <Card bg="white" style={{ width: "18rem" }}>

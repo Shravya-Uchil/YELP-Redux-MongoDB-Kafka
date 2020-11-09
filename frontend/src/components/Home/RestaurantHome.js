@@ -181,7 +181,7 @@ class RestaurantHome extends Component {
   }
 
   calculatePages() {
-    let count = getPageCount(this.state.menu_items.length, 5);
+    let count = getPageCount(this.state.menu_items.length, 4);
     let active = this.state.curPage;
     let paginationItemsTag = [];
     for (let number = 1; number <= count; number++) {
@@ -208,9 +208,9 @@ class RestaurantHome extends Component {
       list.push(data);
     }
     let curPage = this.state.curPage;
-    let pageSize = 5;
+    let pageSize = 4;
     let start = pageSize * (curPage - 1);
-    let end = start + 5;
+    let end = start + pageSize;
     let count = 0;
     let startCount = 0;
     let filteredList = [];
@@ -284,26 +284,28 @@ class RestaurantHome extends Component {
                 src={resImageSrc}
               />
             </Col>
-            <Card.Body>
-              <Card.Title>
-                <h1>{restaurant.restaurant_name}</h1>
-              </Card.Title>
-              <br />
-              <Card.Text>
-                <h4>
-                  {restaurant.phone_number} | {restaurant.zip_code}
-                </h4>
-              </Card.Text>
-              <br />
-              <Card.Text>
-                <h4>Cuisine: {restaurant.cuisine}</h4>
-              </Card.Text>
-              <br />
-              <Card.Text>
-                <h4>Description: {restaurant.description}</h4>
-              </Card.Text>
-              <br />
-            </Card.Body>
+            <Col>
+              <Card.Body>
+                <Card.Title>
+                  <h1>{restaurant.restaurant_name}</h1>
+                </Card.Title>
+                <br />
+                <Card.Text>
+                  <h4>
+                    {restaurant.phone_number} | {restaurant.zip_code}
+                  </h4>
+                </Card.Text>
+                <br />
+                <Card.Text>
+                  <h4>Cuisine: {restaurant.cuisine}</h4>
+                </Card.Text>
+                <br />
+                <Card.Text>
+                  <h4>Description: {restaurant.description}</h4>
+                </Card.Text>
+                <br />
+              </Card.Body>
+            </Col>
           </Row>
         </Card>
       );

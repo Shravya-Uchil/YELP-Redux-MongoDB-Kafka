@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const pool = require("../mysqlDB.js");
+//const pool = require("../mysqlDB.js");
 const path = require("path");
 const fs = require("fs");
 const kafka = require("../kafka/client");

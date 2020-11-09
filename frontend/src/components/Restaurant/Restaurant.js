@@ -20,6 +20,15 @@ import { Link } from "react-router-dom";
 import StarRatings from "react-star-ratings";
 import serverAddress from "../../config";
 import { getPageCount, getPageObjects } from "../../pageutils";
+import {
+  getMenuCategoryCustomer,
+  getMenuItemCustomer,
+  hasReviewed,
+  placeOrder,
+  addReview,
+} from "../../actions/customerRestaurantActions";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
 
 class Restaurant extends Component {
   constructor(props) {
@@ -40,9 +49,8 @@ class Restaurant extends Component {
     this.calculatePages = this.calculatePages.bind(this);
     this.getCategories = this.getCategories.bind(this);
     this.onPage = this.onPage.bind(this);
-    this.getAllMenuItems().then((ret) => {
-      this.getAllCategories();
-    });
+    this.getAllMenuItems();
+    this.getAllCategories();
     this.onAdd = this.onAdd.bind(this);
     console.log("End constructor");
   }
@@ -65,10 +73,8 @@ class Restaurant extends Component {
       let id =
         this.props.location.state.restaurant_id ||
         this.props.location.state._id;
-      axios.defaults.headers.common["authorization"] = localStorage.getItem(
-        "token"
-      );
-      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      this.props.hasReviewed(localStorage.getItem("customer_id"), id);
+      /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
         "token"
       );
       axios
@@ -91,7 +97,7 @@ class Restaurant extends Component {
         .catch((error) => {
           console.log("Error");
           console.log(error);
-        });
+        });*/
 
       document.title = this.props.location.state.restaurant_name;
       localStorage.setItem("selected_restaurant_id", id);
@@ -103,7 +109,8 @@ class Restaurant extends Component {
       let id =
         this.props.location.state.restaurant_id ||
         this.props.location.state._id;
-      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      this.props.getMenuCategoryCustomer(id);
+      /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
         "token"
       );
       axios
@@ -120,7 +127,7 @@ class Restaurant extends Component {
           if (err.response && err.response.data) {
             console.log(err.response.data);
           }
-        });
+        });*/
     }
   };
 
@@ -129,7 +136,8 @@ class Restaurant extends Component {
       let id =
         this.props.location.state.restaurant_id ||
         this.props.location.state._id;
-      axios.defaults.headers.common["authorization"] = localStorage.getItem(
+      this.props.getMenuItemCustomer(id);
+      /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
         "token"
       );
       return axios
@@ -146,7 +154,7 @@ class Restaurant extends Component {
           if (err.response && err.response.data) {
             console.log(err.response.data);
           }
-        });
+        });*/
     }
   };
 
@@ -197,7 +205,8 @@ class Restaurant extends Component {
         };
         console.log("placing order");
         console.log(data);
-        axios.defaults.headers.common["authorization"] = localStorage.getItem(
+        this.props.placeOrder(data);
+        /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
           "token"
         );
         axios
@@ -211,7 +220,7 @@ class Restaurant extends Component {
           })
           .catch((error) => {
             console.log(error);
-          });
+          });*/
       }
     }
   };
@@ -246,7 +255,8 @@ class Restaurant extends Component {
     //var data = Object.assign({}, this.state);
     console.log("Add review");
     console.log(data);
-    axios.defaults.headers.common["authorization"] = localStorage.getItem(
+    this.props.hasReviewed(data);
+    /*axios.defaults.headers.common["authorization"] = localStorage.getItem(
       "token"
     );
     axios
@@ -262,7 +272,7 @@ class Restaurant extends Component {
         console.log(error);
 
         alert("Review already exists!");
-      });
+      });*/
   };
 
   onTypeSelect = (e) => {
@@ -273,7 +283,7 @@ class Restaurant extends Component {
   };
 
   calculatePages() {
-    let count = getPageCount(this.state.menu_items.length, 5);
+    let count = getPageCount(this.state.menu_items.length, 4);
     let active = this.state.curPage;
     let paginationItemsTag = [];
     for (let number = 1; number <= count; number++) {
@@ -300,9 +310,9 @@ class Restaurant extends Component {
       list.push(data);
     }
     let curPage = this.state.curPage;
-    let pageSize = 5;
+    let pageSize = 4;
     let start = pageSize * (curPage - 1);
-    let end = start + 5;
+    let end = start + pageSize;
     let count = 0;
     let startCount = 0;
     let filteredList = [];
@@ -342,6 +352,45 @@ class Restaurant extends Component {
 
     //console.log(filteredList);
     return filteredList;
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log(
+      "We in Customer restaurant props received, next prop is: ",
+      nextProps
+    );
+    if (nextProps.result && nextProps.result.result === "REVIEWED") {
+      console.log("Restaurant reviewed");
+      console.log(nextProps);
+      this.setState({
+        hasReviewed: 1,
+      });
+    } else if (nextProps.menu_item) {
+      console.log("menu item response");
+      console.log(nextProps);
+      this.setState({
+        menu_items: nextProps.menu_item,
+      });
+    } else if (nextProps.menu_category) {
+      console.log("menu category response");
+      console.log(nextProps);
+      this.setState({
+        menu_category: nextProps.menu_category,
+      });
+    } else if (nextProps.result && nextProps.result.status === "ORDER_PLACED") {
+      alert("Your order is placed!");
+      this.setState({
+        isOrderPlaced: 1,
+      });
+    } else if (nextProps.result === "REVIEW_ADDED") {
+      alert("Review Added!");
+      this.setState({
+        isAddDone: 1,
+      });
+    } else {
+      console.log("Redux error. Props:");
+      console.log(nextProps);
+    }
   }
 
   render() {
@@ -446,25 +495,27 @@ class Restaurant extends Component {
                   src={imageSrc}
                 />
               </Col>
-              <Card.Body>
-                <Card.Title>
-                  <h1>{restaurant_name}</h1>
-                </Card.Title>
-                <br />
-                <Card.Text>
-                  <h4>
-                    {zip_code} | {contact}
-                  </h4>
-                </Card.Text>
-                <br />
-                <Card.Text>
-                  <h4>Cuisine: {cuisine}</h4>
-                </Card.Text>
-                <br />
-                <Card.Text>
-                  <h4>Description: {description}</h4>
-                </Card.Text>
-              </Card.Body>
+              <Col>
+                <Card.Body>
+                  <Card.Title>
+                    <h1>{restaurant_name}</h1>
+                  </Card.Title>
+                  <br />
+                  <Card.Text>
+                    <h4>
+                      {zip_code} | {contact}
+                    </h4>
+                  </Card.Text>
+                  <br />
+                  <Card.Text>
+                    <h4>Cuisine: {cuisine}</h4>
+                  </Card.Text>
+                  <br />
+                  <Card.Text>
+                    <h4>Description: {description}</h4>
+                  </Card.Text>
+                </Card.Body>
+              </Col>
             </Row>
           </Card>
           <Form onSubmit={this.onAdd}>
@@ -537,4 +588,29 @@ class Restaurant extends Component {
   }
 }
 
-export default Restaurant;
+Restaurant.propTypes = {
+  getMenuCategoryCustomer: PropTypes.func.isRequired,
+  getMenuItemCustomer: PropTypes.func.isRequired,
+  hasReviewed: PropTypes.func.isRequired,
+  placeOrder: PropTypes.func.isRequired,
+  addReview: PropTypes.func.isRequired,
+  menu_item: PropTypes.object.isRequired,
+  menu_category: PropTypes.object.isRequired,
+  result: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  result: state.customerRestaurant.result,
+  menu_category: state.customerRestaurant.menu_category,
+  menu_item: state.customerRestaurant.menu_item,
+});
+
+export default connect(mapStateToProps, {
+  getMenuCategoryCustomer,
+  getMenuItemCustomer,
+  hasReviewed,
+  placeOrder,
+  addReview,
+})(Restaurant);
+
+//export default Restaurant;

@@ -7,6 +7,7 @@ import restaurantHomeReducer from "./restaurantHomeReducer";
 import messageReducer from "./messageReducer";
 import restaurantOrderReducer from "./restaurantOrderReducer";
 import eventReducer from "./eventReducer";
+import customerRestaurantReducer from "./customerRestaurantReducer";
 
 export default combineReducers({
   login: loginReducer,
@@ -16,5 +17,6 @@ export default combineReducers({
   restaurantHome: restaurantHomeReducer,
   messages: messageReducer,
   restaurantOrder: restaurantOrderReducer,
+  customerRestaurant: customerRestaurantReducer,
   event: eventReducer,
 });

@@ -152,6 +152,10 @@ async function addItem(msg, callback) {
       return callback(null, response);
     }
 
+    if (restaurant.menu_category.indexOf(category._id) === -1) {
+      restaurant.menu_category.push(category._id);
+    }
+
     if (msg.body.item_id != null) {
       // update
       let item = await MenuItem.findById(msg.body.item_id);
