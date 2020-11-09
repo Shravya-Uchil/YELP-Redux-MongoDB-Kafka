@@ -37,7 +37,7 @@ let handle_request = async (msg, callback) => {
           return callback(null, response);
         } else {
           console.log("incorrect password");
-          response.status = 200;
+          response.status = 401;
           response.data = "INCORRECT_PASSWORD";
           return callback(null, response);
         }
@@ -68,7 +68,7 @@ let handle_request = async (msg, callback) => {
           response.data = JSON.stringify(restaurantObject);
           return callback(null, response);
         } else {
-          response.status = 200;
+          response.status = 401;
           response.data = "INCORRECT_PASSWORD";
           return callback(null, response);
         }

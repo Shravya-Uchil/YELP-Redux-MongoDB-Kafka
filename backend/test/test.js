@@ -68,7 +68,7 @@ describe("Yelp", function () {
     // Get reviewes for a customer id
     it("Get all reviews test", function (done) {
       agent
-        .get("/yelp/restaurant/restaurantReview/1")
+        .get("/yelp/restaurant/restaurantReview/5f9e0c4cb4cb2f493018b6e6")
         .then(function (res) {
           expect(res).to.have.status(200);
           expect(JSON.parse(res.text).length).to.be.at.least(1);
@@ -85,9 +85,9 @@ describe("Yelp", function () {
       agent
         .post("/yelp/event/register")
         .send({
-          event_id: "4",
-          restaurant_id: "1",
-          customer_id: "7",
+          event_id: "5fa8a5875c6fb18148c7295e",
+          restaurant_id: "5fa764a3920bae9e7cff80e7",
+          customer_id: "5fa65c6fa47e7d760845fe83",
         })
         .then(function (res) {
           expect(res).to.have.status(200);
