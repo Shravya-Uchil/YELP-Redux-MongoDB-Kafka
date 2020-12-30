@@ -6,7 +6,7 @@ import locationIcon from "@iconify/icons-mdi/map-marker";
 import "./Map.css";
 import Geocode from "react-geocode";
 
-Geocode.setApiKey("AIzaSyAIzrgRfxiIcZhQe3Qf5rIIRx6exhZPwwE");
+Geocode.setApiKey("");
 Geocode.setLanguage("en");
 Geocode.setRegion("us");
 
@@ -42,7 +42,6 @@ class Map extends Component {
       console.log(this.props.locationList);
       let markers = [];
       for (let i = 0; i < this.props.locationList.length; i++) {
-        console.log("markerssssssss");
         let pos = {
           lat: this.props.locationList[i].lat,
           lng: this.props.locationList[i].lng,
@@ -86,7 +85,7 @@ class Map extends Component {
         <div className="google-map">
           <GoogleMapReact
             bootstrapURLKeys={{
-              key: "AIzaSyAIzrgRfxiIcZhQe3Qf5rIIRx6exhZPwwE",
+              key: "",
             }}
             defaultCenter={this.props.center}
             defaultZoom={this.props.zoomLevel}
